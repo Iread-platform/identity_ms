@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Consul;
+using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data;
 using iread_identity_ms.DataAccess.Repo;
 using iread_identity_ms.Web.Dto;
@@ -135,7 +136,7 @@ namespace iread_identity_ms
 
             services.AddScoped<SecurityService>();
             services.AddScoped<UsersService>();
-            services.AddScoped<UsersRepository>();
+            services.AddScoped<IPublicRepository, PublicRepository>();
 
         }
 

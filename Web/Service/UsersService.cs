@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data.Entity;
 using iread_identity_ms.DataAccess.Repo;
 using Microsoft.EntityFrameworkCore;
@@ -9,26 +10,28 @@ namespace iread_identity_ms.Web.Service
 {
     public class UsersService
     {
-        private readonly UsersRepository _usersRepository;
+
+
+        private readonly IPublicRepository _repository;
         private readonly SecurityService _securityService;
-        public UsersService(UsersRepository usersRepository, SecurityService securityService)
+        public UsersService(IPublicRepository repository, SecurityService securityService)
         {
-            _usersRepository = usersRepository;
+            _repository = repository;
             _securityService = securityService;
         }
 
         public async Task<SysUser> GetByEmail(string email)
         {
-            return await _usersRepository.GetByEmail(email);
+            return await _repository.getUsersRepository.GetByEmail(email);
         }
         public async Task<List<SysUser>> GetAll()
         {
-            return await _usersRepository.GetAll();
+            return await _repository.getUsersRepository.GetAll();
         }
 
         public async Task<SysUser> GetById(int id)
         {
-            return await _usersRepository.GetById(id);
+            return await _repository.getUsersRepository.GetById(id);
         }
 
          public bool Insert(SysUser user)
@@ -38,7 +41,7 @@ namespace iread_identity_ms.Web.Service
             user.StoredSalt = hashSalt.Salt;
             try
             {
-                _usersRepository.Insert(user);
+                _repository.getUsersRepository.Insert(user);
                 return true; 
             }
             catch (DbUpdateConcurrencyException)
@@ -51,7 +54,7 @@ namespace iread_identity_ms.Web.Service
         {
             try
             {
-                _usersRepository.Delete(user);
+                _repository.getUsersRepository.Delete(user);
                 return true;
             }
             catch (DbUpdateConcurrencyException)
