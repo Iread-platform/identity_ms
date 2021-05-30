@@ -20,6 +20,11 @@
     "DefaultConnection": "Server=localhost;Database=identity_ms_db;Uid=codavia;Pwd=cod@v!@; convert zero datetime=True"
   },
 
+  "Jwt": {
+    "SecretKey": "VaibhavBhapkar!1ghtxD3Spri2",
+    "ExpiredAfterInHour": "24"
+  },
+
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",

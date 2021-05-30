@@ -29,5 +29,9 @@ namespace iread_identity_ms.DataAccess.Data.Entity
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string Email { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
+        public string Name { get; set; }
+
+
     }
 }
