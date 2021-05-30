@@ -9,6 +9,13 @@
     }
   },
 
+  "Release" : "1",
+
+  "ConsulConfig": {
+    "Host": "http://localhost:8500",
+    "ServiceName": "identity_ms"
+  },
+
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=identity_ms_db;Uid=codavia;Pwd=cod@v!@; convert zero datetime=True"
   },
@@ -27,7 +34,7 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "applicationUrl": "http://localhost:5000;https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

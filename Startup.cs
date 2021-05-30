@@ -93,6 +93,8 @@ namespace iread_identity_ms
             {
                 endpoints.MapControllers();
             });
+
+            app.UseConsul(Configuration);
         }
     }
 }
