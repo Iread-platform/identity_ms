@@ -50,8 +50,9 @@ namespace iread_identity_ms
         public void ConfigureServices(IServiceCollection services)
         {
 
-            // for routing
-            services.AddControllers();
+            // for routing the request
+            //services.AddMvc(); // core version 2
+            services.AddMvc(options => options.EnableEndpointRouting = false); // core version 3 and up
 
 
             // for connection of DB
@@ -93,21 +94,12 @@ namespace iread_identity_ms
                 };
            });
 
-
-
             // for stop looping of json result
             services.AddMvc()
             .AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            // for connection of DB
-            services.AddDbContext<AppDbContext>(
-                options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
-                });
 
-            // for routing the request
-            //services.AddMvc(); // core version 2
-            services.AddMvc(options => options.EnableEndpointRouting = false); // core version 3 and up
 
             // for Auto Mapper configurations
             var mapperConfig = new MapperConfiguration(mc =>
@@ -143,8 +135,6 @@ namespace iread_identity_ms
 
             services.AddScoped<SecurityService>();
             services.AddScoped<UsersRepository>();
-           
-            services.AddMvc().AddControllersAsServices();
 
         }
 
