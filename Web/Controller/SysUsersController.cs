@@ -20,14 +20,14 @@ namespace M3allem.M3allem.Controller
     [ApiController]
     public class SysUsersController : ControllerBase
     {
-        private readonly UsersRepository _userRepository;
+        private readonly UsersService _usersService;
         private readonly SecurityService _securityService;
         private readonly IMapper _mapper;
 
-        public SysUsersController(UsersRepository userRepository, SecurityService securityService,
+        public SysUsersController(UsersService usersService, SecurityService securityService,
              IMapper mapper)
         {
-            _userRepository = userRepository;
+            _usersService = usersService;
             _securityService = securityService;
             _mapper = mapper;
         }
@@ -35,9 +35,9 @@ namespace M3allem.M3allem.Controller
         // GET: api/SysUsers
         [HttpGet]
         [Authorize(Roles = Policies.Administrator)]
-        public IEnumerable<UserDto> GetUsers()
+        public async Task<IEnumerable<UserDto>> GetUsers()
         {
-            return _mapper.Map<IEnumerable<UserDto>>(_userRepository.GetAll());
+            return _mapper.Map<IEnumerable<UserDto>>(await _usersService.GetAll());
         }
         
         
@@ -62,7 +62,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            var user = _userRepository.GetByEmail(email);
+            var user = await _usersService.GetByEmail(email);
 
             if (user == null)
             {
@@ -83,7 +83,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            var user = _userRepository.GetById(id);
+            var user = await _usersService.GetById(id);
 
             if (user == null)
             {
@@ -109,7 +109,7 @@ namespace M3allem.M3allem.Controller
             }
 
             var userEntity = _mapper.Map<SysUser>(user);
-            UserFieldValidation(userEntity);
+            await UserFieldValidationAsync(userEntity);
 
             if (!ModelState.IsValid)
             {
@@ -117,7 +117,7 @@ namespace M3allem.M3allem.Controller
             }
 
             IActionResult response = BadRequest();
-            if (!_userRepository.Insert(userEntity))
+            if (!_usersService.Insert(userEntity))
             {
                 return BadRequest();
             }
@@ -146,13 +146,13 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            var user = _userRepository.GetById(id);
+            var user = await _usersService.GetById(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            if (!_userRepository.Delete(user))
+            if (!_usersService.Delete(user))
             {
                 return BadRequest();
             }
@@ -161,10 +161,10 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        private void UserFieldValidation(SysUser user)
+        private async Task UserFieldValidationAsync(SysUser user)
         {
  
-            SysUser similarUser = _userRepository.GetByEmail(user.Email);
+            var similarUser = await _usersService.GetByEmail(user.Email);
             if (similarUser != null)
             {
                 ModelState.AddModelError("email", "Email already exist");

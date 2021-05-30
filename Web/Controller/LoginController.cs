@@ -15,15 +15,15 @@ namespace iread_identity_ms.Web.Controller
     [Route("api/[controller]")]
     public class LoginController : ControllerBase
     { 
-        private readonly UsersRepository _usersRepository;
+        private readonly UsersService _usersService;
         private readonly SecurityService _securityService;
         private readonly IMapper _mapper;
 
-        public LoginController(UsersRepository usersRepository,
+        public LoginController(UsersService usersService,
             SecurityService securityService, IMapper mapper)
         {
             _securityService = securityService;
-            _usersRepository = usersRepository;
+            _usersService = usersService;
             _mapper = mapper;
         }
 
@@ -43,12 +43,13 @@ namespace iread_identity_ms.Web.Controller
 
             IActionResult response = Unauthorized();
 
-            SysUser user = _usersRepository.GetByEmail(login.Email);
+            SysUser user = await _usersService.GetByEmail(login.Email);
 
             if (user == null)
             {
                 return NotFound();
             }
+
             if (!_securityService.VerifyPassword(login.Password, user.StoredSalt, user.Password))
             {
                 ModelState.AddModelError("Password", "Password is incorrect");

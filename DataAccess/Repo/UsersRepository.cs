@@ -21,15 +21,15 @@ namespace iread_identity_ms.DataAccess.Repo
             _securityService = securityService;
         }
 
-        public List<SysUser> GetAll()
+        public Task<List<SysUser>> GetAll()
         {
-            return _context.Users.ToList();
+            return _context.Users.ToListAsync();
         }
         
         
-        public SysUser GetById(int id)
+        public async Task<SysUser> GetById(int id)
         {
-            return _context.Users.SingleOrDefault(u => u.UserId == id);
+            return await _context.Users.SingleOrDefaultAsync(u => u.UserId == id);
         }
 
         public bool Update(SysUser user)
@@ -67,9 +67,9 @@ namespace iread_identity_ms.DataAccess.Repo
             return true;
         }
 
-        public SysUser GetByEmail(string email)
+        public async Task<SysUser> GetByEmail(string email)
         {
-            return _context.Users.SingleOrDefault(u => u.Email == email);
+            return await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
         }
 
         public SysUser GetByEmailAndPassword(string email, string pw)
@@ -77,35 +77,14 @@ namespace iread_identity_ms.DataAccess.Repo
             return _context.Users.SingleOrDefault(u => u.Password == pw && u.Email == email);
         }
 
-        public bool Insert(SysUser user)
+        public void Insert(SysUser user)
         {
-            var hashSalt = _securityService.EncryptPassword(user.Password);
-            user.Password = hashSalt.Hash;
-            user.StoredSalt = hashSalt.Salt;
             _context.Users.Add(user);
-            try
-            {
-                _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return false;
-            }
-            return true;
         }
 
-        public bool Delete(SysUser user)
+        public void Delete(SysUser user)
         {
             _context.Users.Remove(user);
-            try
-            {
-                _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return false;
-            }
-            return true;
         }
 
         public bool Exists(int id)
