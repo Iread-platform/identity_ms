@@ -39,11 +39,13 @@ namespace iread_identity_ms.DataAccess.Repo
         public void Insert(SysUser user)
         {
             _context.Users.Add(user);
+            _context.SaveChanges();
         }
 
         public void Delete(SysUser user)
         {
             _context.Users.Remove(user);
+            _context.SaveChanges();
         }
 
         public bool Exists(int id)
