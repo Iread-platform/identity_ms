@@ -5,26 +5,26 @@ using System;
 
 namespace iread_identity_ms.DataAccess.Data
 {
-    public class AppDbContext : DbContext
-    {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
+    // public class AppDbContext : DbContext
+    // {
+    //     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    //     {
 
-        }
+    //     }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+    //     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //     {
             
-        }
+    //     }
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+    //     protected override void OnModelCreating(ModelBuilder modelBuilder)
+    //     {
            
-        }
+    //     }
 
-        //entities
-        public DbSet<SysUser> Users { get; set; }
+    //     //entities
+    //     public DbSet<SysUser> Users { get; set; }
 
-    }
+    // }
 }

@@ -37,11 +37,12 @@ namespace iread_identity_ms.Web.Service
          public bool Insert(SysUser user)
         {
             var hashSalt = _securityService.EncryptPassword(user.Password);
+            string plainPassword = user.Password;
             user.Password = hashSalt.Hash;
             user.StoredSalt = hashSalt.Salt;
             try
             {
-                _repository.getUsersRepository.Insert(user);
+                _repository.getUsersRepository.Insert(user, plainPassword);
                 return true; 
             }
             catch (DbUpdateConcurrencyException)

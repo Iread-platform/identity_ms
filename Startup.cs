@@ -2,12 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Consul;
+using IdentityModel;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.Models;
+using IdentityServer4.Test;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data;
+using iread_identity_ms.DataAccess.Data.Entity;
 using iread_identity_ms.DataAccess.Repo;
 using iread_identity_ms.Web.Dto;
 using iread_identity_ms.Web.Service;
@@ -17,6 +25,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +35,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 
 namespace iread_identity_ms
 {
@@ -52,14 +62,8 @@ namespace iread_identity_ms
         {
 
             // for routing the request
-            //services.AddMvc(); // core version 2
             services.AddMvc(options => options.EnableEndpointRouting = false); // core version 3 and up
 
-
-            // for connection of DB
-            services.AddDbContext<AppDbContext>(
-                options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
-                });
             
             // for consul
             services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
@@ -138,11 +142,113 @@ namespace iread_identity_ms
             services.AddScoped<UsersService>();
             services.AddScoped<IPublicRepository, PublicRepository>();
 
+
+            
+            // services.AddIdentityServer()
+            // .AddInMemoryClients(Clients.Get())                         
+            // .AddInMemoryIdentityResources(Resources.GetIdentityResources())
+            // .AddInMemoryApiResources(Resources.GetApiResources())
+            // .AddInMemoryApiScopes(Resources.GetApiScopes())
+            // .AddTestUsers(Users.Get())                     
+            // .AddDeveloperSigningCredential();
+
+
+            //  // for connection of DB
+            //      services.AddDbContext<AppDbContext>(
+            //          options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
+            //          });
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+ // Add framework services.
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddIdentityCore<ApplicationUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+           
+            string migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+            services.AddIdentityServer()
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = builder =>
+                       builder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"),
+                       sql => sql.MigrationsAssembly(migrationsAssembly));
+                })
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = builder =>
+                        builder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"),
+                        sql => sql.MigrationsAssembly(migrationsAssembly));
+
+                    // this enables automatic token cleanup. this is optional.
+                    options.EnableTokenCleanup = true;
+                    options.TokenCleanupInterval = 30;
+                }).AddDeveloperSigningCredential();
+
+
+
+
+        }
+
+
+        private void InitializeDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+                serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+
+                var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                context.Database.Migrate();
+                if (!context.Clients.Any())
+                {
+                    foreach (var client in Clients.Get())
+                    {
+                        context.Clients.Add(client.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.IdentityResources.Any())
+                {
+                    foreach (var resource in Resources.GetIdentityResources())
+                    {
+                        context.IdentityResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.ApiResources.Any())
+                {
+                    foreach (var resource in Resources.GetApiResources())
+                    {
+                        context.ApiResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.ApiScopes.Any())
+                {
+                    foreach (var resource in Resources.GetApiScopes())
+                    {
+                        context.ApiScopes.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+                
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+           InitializeDatabase(app);
+           
            if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -153,7 +259,7 @@ namespace iread_identity_ms
             // enable auto database updates when run the application (after add migrations)
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.Database.Migrate();
             }
 
@@ -163,6 +269,9 @@ namespace iread_identity_ms
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            
+
+            app.UseIdentityServer();
 
             app.UseEndpoints(endpoints =>
             {
@@ -178,4 +287,97 @@ namespace iread_identity_ms
 
         }
     }
+
+
+ internal class Clients
+{
+    public static IEnumerable<Client> Get()
+    {
+        return new List<Client>
+        {
+            new Client
+            {
+                ClientId = "oauthClient",
+                ClientName = "Example client application using client credentials",
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                ClientSecrets = new List<Secret> {new Secret("123456".Sha256())}, // change me!
+                AllowedScopes = new List<string> {"api1.read", Policies.Administrator}
+            },
+            new Client
+            {
+                ClientId = "yazan",
+                ClientName = "Example client application using client credentials",
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                ClientSecrets = new List<Secret> {new Secret("123456".Sha256())},
+                AllowedScopes = new List<string> {Policies.Administrator}
+            }
+        };
+    }
+}
+
+internal class Resources
+{
+    public static IEnumerable<IdentityResource> GetIdentityResources()
+    {
+        return new[]
+        {
+            new IdentityResources.OpenId(),
+            new IdentityResources.Profile(),
+            new IdentityResources.Email(),
+            new IdentityResource
+            {
+                Name = "role",
+                UserClaims = new List<string> {"role"}
+            }
+        };
+    }
+
+    public static IEnumerable<ApiResource> GetApiResources()
+    {
+        return new[]
+        {
+            new ApiResource
+            {
+                Name = "api1",
+                DisplayName = "API #1",
+                Description = "Allow the application to access API #1 on your behalf",
+                Scopes = new List<string> {Policies.Administrator, Policies.Student, Policies.Teacher, "api1.read", "api1.write"},
+                ApiSecrets = new List<Secret> {new Secret("ScopeSecret".Sha256())},
+                UserClaims = new List<string> {"role"}
+            }
+        };
+    }
+	
+	public static IEnumerable<ApiScope> GetApiScopes()
+    {
+        return new[]
+        {
+            new ApiScope(Policies.Administrator, Policies.Administrator),
+            new ApiScope(Policies.Student, Policies.Student),
+            new ApiScope(Policies.Teacher, Policies.Teacher),
+            new ApiScope("api1.read", "Read Access to API #1"),
+			new ApiScope("api1.write", "Write Access to API #1")
+        };
+    }
+}
+
+internal class Users
+{
+    public static List<TestUser> Get()
+    {
+        return new List<TestUser> {
+            new TestUser {
+                SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
+                Username = "scott",
+                Password = "password",
+                Claims = new List<Claim> {
+                    new Claim(JwtClaimTypes.Email, "scott@scottbrady91.com"),
+                    new Claim(JwtClaimTypes.Role, "admin")
+                }
+            }
+        };
+    }
+}
+
+
 }

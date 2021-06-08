@@ -10,7 +10,7 @@ namespace iread_identity_ms.DataAccess.Repo
 
         public Task<SysUser> GetByEmail(string email);
 
-        public void Insert(SysUser user);
+        public void Insert(SysUser user, string plainPassword);
 
         public Task<List<SysUser>> GetAll();
 
