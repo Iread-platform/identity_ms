@@ -21,14 +21,16 @@ namespace M3allem.M3allem.Controller
     public class SysUsersController : ControllerBase
     {
         private readonly UsersService _usersService;
+        private readonly AppUsersService _appUsersService;
         private readonly SecurityService _securityService;
         private readonly IMapper _mapper;
 
-        public SysUsersController(UsersService usersService, SecurityService securityService,
+        public SysUsersController(AppUsersService appUsersService, UsersService usersService, SecurityService securityService,
              IMapper mapper)
         {
             _usersService = usersService;
             _securityService = securityService;
+            _appUsersService = appUsersService;
             _mapper = mapper;
         }
 
@@ -136,6 +138,52 @@ namespace M3allem.M3allem.Controller
             return response;
         }
 
+
+
+        // POST: api/SysUsers
+        [HttpPost("App")]
+        public async Task<IActionResult> PostAppUser([FromBody] ApplicationUser userEntity)
+        {
+            if (userEntity == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            //var userEntity = _mapper.Map<ApplicationUser>(user);
+            await AppUserFieldValidationAsync(userEntity);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            IActionResult response = BadRequest();
+            if (!_appUsersService.Insert(userEntity))
+            {
+                return BadRequest();
+            }
+
+            if (userEntity != null)
+            {
+                response = Ok(new
+                {
+                    userDetails = _mapper.Map<UserDto>(userEntity),
+                });
+            }
+
+            return response;
+        }
+
+
+
+
+        
+
         // DELETE: api/SysUsers/5
         [HttpDelete("{id}")]
         [Authorize(Roles = Policies.Administrator)]
@@ -165,6 +213,16 @@ namespace M3allem.M3allem.Controller
         {
  
             var similarUser = await _usersService.GetByEmail(user.Email);
+            if (similarUser != null)
+            {
+                ModelState.AddModelError("email", "Email already exist");
+            }
+        }
+
+         private async Task AppUserFieldValidationAsync(ApplicationUser user)
+        {
+ 
+            var similarUser = await _appUsersService.GetByEmail(user.Email);
             if (similarUser != null)
             {
                 ModelState.AddModelError("email", "Email already exist");

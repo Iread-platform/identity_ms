@@ -8,33 +8,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace iread_identity_ms.Web.Service
 {
-    public class UsersService
+    public class AppUsersService
     {
-
 
         private readonly IPublicRepository _repository;
         private readonly SecurityService _securityService;
-        public UsersService(IPublicRepository repository, SecurityService securityService)
+        public AppUsersService(IPublicRepository repository, SecurityService securityService)
         {
             _repository = repository;
             _securityService = securityService;
         }
 
-        public async Task<SysUser> GetByEmail(string email)
+        public async Task<ApplicationUser> GetByEmail(string email)
         {
-            return await _repository.GetUsersRepository.GetByEmail(email);
+            return await _repository.GetAppUsersRepository.GetByEmail(email);
         }
-        public async Task<List<SysUser>> GetAll()
+        public async Task<List<ApplicationUser>> GetAll()
         {
-            return await _repository.GetUsersRepository.GetAll();
-        }
-
-        public async Task<SysUser> GetById(int id)
-        {
-            return await _repository.GetUsersRepository.GetById(id);
+            return await _repository.GetAppUsersRepository.GetAll();
         }
 
-         public bool Insert(SysUser user)
+        public async Task<ApplicationUser> GetById(int id)
+        {
+            return await _repository.GetAppUsersRepository.GetById(id);
+        }
+
+         public bool Insert(ApplicationUser user)
         {
             var hashSalt = _securityService.EncryptPassword(user.Password);
             string plainPassword = user.Password;
@@ -42,7 +41,7 @@ namespace iread_identity_ms.Web.Service
             user.StoredSalt = hashSalt.Salt;
             try
             {
-                _repository.GetUsersRepository.Insert(user, plainPassword);
+                _repository.GetAppUsersRepository.Insert(user, plainPassword);
                 return true; 
             }
             catch (DbUpdateConcurrencyException)
@@ -51,11 +50,11 @@ namespace iread_identity_ms.Web.Service
             }
         }
 
-         public bool Delete(SysUser user)
+         public bool Delete(ApplicationUser user)
         {
             try
             {
-                _repository.GetUsersRepository.Delete(user);
+                _repository.GetAppUsersRepository.Delete(user);
                 return true;
             }
             catch (DbUpdateConcurrencyException)

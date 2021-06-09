@@ -140,6 +140,7 @@ namespace iread_identity_ms
 
             services.AddScoped<SecurityService>();
             services.AddScoped<UsersService>();
+            services.AddScoped<AppUsersService>();
             services.AddScoped<IPublicRepository, PublicRepository>();
 
 

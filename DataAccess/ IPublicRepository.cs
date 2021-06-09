@@ -4,6 +4,7 @@ namespace iread_identity_ms.DataAccess
 {
     public interface IPublicRepository
     {
-        IUsersRepository getUsersRepository { get; }
+        IUsersRepository GetUsersRepository { get; }
+        IAppUsersRepository GetAppUsersRepository { get; }
     }
 }
