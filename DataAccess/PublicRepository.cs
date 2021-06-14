@@ -15,7 +15,9 @@ namespace iread_identity_ms.DataAccess
         private IUsersRepository _usersRepository;
         private IAppUsersRepository _appUsersRepository;
 
-        public PublicRepository( ApplicationDbContext context, SecurityService securityService, ConfigurationDbContext configurationContext)
+        public PublicRepository( ApplicationDbContext context, SecurityService securityService
+        , ConfigurationDbContext configurationContext
+        )
         {
             _context = context;
             _securityService = securityService;
@@ -25,7 +27,9 @@ namespace iread_identity_ms.DataAccess
         public IUsersRepository GetUsersRepository {
             get
             {
-                return _usersRepository ??= new UsersRepository(_context,_securityService, _configurationContext);
+                return _usersRepository ??= new UsersRepository(_context,_securityService
+                //, _configurationContext
+                );
             }
         }
         public IAppUsersRepository GetAppUsersRepository {

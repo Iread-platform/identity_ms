@@ -12,7 +12,9 @@ using IdentityModel;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
+using IdentityServer4.Services;
 using IdentityServer4.Test;
+using IdentityServer4.Validation;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data;
 using iread_identity_ms.DataAccess.Data.Entity;
@@ -140,7 +142,7 @@ namespace iread_identity_ms
 
             services.AddScoped<SecurityService>();
             services.AddScoped<UsersService>();
-            services.AddScoped<AppUsersService>();
+            //services.AddScoped<AppUsersService>();
             services.AddScoped<IPublicRepository, PublicRepository>();
 
 
@@ -155,14 +157,23 @@ namespace iread_identity_ms
 
 
             //  // for connection of DB
-            //      services.AddDbContext<AppDbContext>(
+            //      services.AddDbContext<ApplicationDbContext>(
             //          options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
             //          });
 
 //////////////////////////////////////////////////////////////////////////////////
 
 
- // Add framework services.
+            // Add framework services.
+
+            services.AddScoped<UserManager<ApplicationUser>>();
+            services.AddScoped<PasswordHasher<ApplicationUser>>();
+            //Inject the classes we just created
+            services.AddTransient<IResourceOwnerPasswordValidator, ResourceOwnerPasswordValidator>();
+            services.AddTransient<IProfileService, ProfileService>();
+
+
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -188,13 +199,16 @@ namespace iread_identity_ms
                     // this enables automatic token cleanup. this is optional.
                     options.EnableTokenCleanup = true;
                     options.TokenCleanupInterval = 30;
-                }).AddDeveloperSigningCredential();
-
-
+                }).AddDeveloperSigningCredential()
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+            ;
+                
 
 
         }
 
+
+        // Add framework services.
 
         private void InitializeDatabase(IApplicationBuilder app)
         {
@@ -203,7 +217,12 @@ namespace iread_identity_ms
                 serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
 
+                var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                var passwordHasher = serviceScope.ServiceProvider.GetRequiredService<PasswordHasher<ApplicationUser>>();
+                
+                
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                var applicationDbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.Database.Migrate();
                 if (!context.Clients.Any())
                 {
@@ -241,6 +260,35 @@ namespace iread_identity_ms
                     context.SaveChanges();
                 }
                 
+
+
+                ApplicationUser applicationUser = new ApplicationUser();
+                Guid guid = Guid.NewGuid();
+                applicationUser.Id = guid.ToString();
+                applicationUser.UserName = "scott";
+                applicationUser.Name = "scott";
+                applicationUser.Role = "Teacher";
+                applicationUser.Password = "password";
+                applicationUser.Email = "wx@hotmail.com";
+                applicationUser.NormalizedUserName = "wx@hotmail.com";
+
+                applicationDbContext.ApplicationUsers.Add(applicationUser);
+
+
+                var hasedPassword = passwordHasher.HashPassword(applicationUser, "password");
+                applicationUser.SecurityStamp = Guid.NewGuid().ToString();
+                applicationUser.PasswordHash = hasedPassword;
+
+                applicationDbContext.SaveChanges();
+
+
+
+                // var user = new ApplicationUser { UserName = "wx2@hotmail.com", Email = "wx2@hotmail.com" };
+                // var result =  userManager.CreateAsync(user, "YourPassWord");
+
+                // applicationDbContext.ApplicationUsers.Add(result.Result);
+                //applicationDbContext.SaveChanges();
+                
             }
         }
 
@@ -248,6 +296,7 @@ namespace iread_identity_ms
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
+            // Add framework services.
            InitializeDatabase(app);
            
            if (env.IsDevelopment())
@@ -294,24 +343,29 @@ namespace iread_identity_ms
 {
     public static IEnumerable<Client> Get()
     {
+        Client ireadClient = new Client
+            {
+                ClientId = "iread_identity_ms",
+                ClientName = "identity ms client application using password grant types",
+                AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
+                ClientSecrets = new List<Secret> {new Secret("123456".Sha256())},
+                //ClientSecrets = new List<Secret> {new Secret("123456")},
+                AllowedScopes = new List<string> {Policies.Administrator,Policies.Student,Policies.Teacher}
+            };
+            //ireadClient.RequireClientSecret =false;
+    
         return new List<Client>
         {
-            new Client
-            {
-                ClientId = "oauthClient",
-                ClientName = "Example client application using client credentials",
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-                ClientSecrets = new List<Secret> {new Secret("123456".Sha256())}, // change me!
-                AllowedScopes = new List<string> {"api1.read", Policies.Administrator}
-            },
-            new Client
-            {
-                ClientId = "yazan",
-                ClientName = "Example client application using client credentials",
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-                ClientSecrets = new List<Secret> {new Secret("123456".Sha256())},
-                AllowedScopes = new List<string> {Policies.Administrator}
-            }
+            // new Client
+            // {
+            //     ClientId = "oauthClient",
+            //     ClientName = "Example client application using client credentials",
+            //     AllowedGrantTypes = GrantTypes.ClientCredentials,
+            //     ClientSecrets = new List<Secret> {new Secret("123456".Sha256())}, // change me!
+            //     AllowedScopes = new List<string> {"api1.read", Policies.Administrator}
+            // },
+            ireadClient
+           
         };
     }
 }
@@ -360,8 +414,8 @@ internal class Resources
 			new ApiScope("api1.write", "Write Access to API #1")
         };
     }
-}
 
+}
 internal class Users
 {
     public static List<TestUser> Get()

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using IdentityModel.Client;
 using iread_identity_ms.DataAccess.Data.Entity;
 using iread_identity_ms.DataAccess.Repo;
 using iread_identity_ms.Web.Dto;
@@ -67,5 +68,30 @@ namespace iread_identity_ms.Web.Controller
             return response;
         }
 
+
+
+    // public void Test(){
+
+    //         // request token
+    //     var tokenClient = new TokenClient("http://localhost:5000/connect/token", "ro.client", "secret");
+    //     var tokenResponse = await tokenClient.RequestResourceOwnerPasswordAsync("alice", "password", "api1");
+
+    //     if (tokenResponse.IsError)
+    //     {
+    //         Console.WriteLine(tokenResponse.Error);
+    //         return;
+    //     }
+
+    //     Console.WriteLine(tokenResponse.Json);
+    //     Console.WriteLine("\n\n");
+    //     }
+
+
+
     }
+
+
+
+        
+
 }

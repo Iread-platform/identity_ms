@@ -43,22 +43,15 @@ namespace iread_identity_ms.DataAccess.Repo
             return await _context.ApplicationUsers.SingleOrDefaultAsync(u => u.Email == email);
         }
 
-        public void Insert(ApplicationUser user, string plainPassword)
+        public async Task<ApplicationUser> GetByName(string userName)
+        {
+            return await _context.ApplicationUsers.SingleOrDefaultAsync(u => u.UserName == userName);
+        }
+
+        public void Insert(ApplicationUser user)
         {
             _context.ApplicationUsers.Add(user);
-            _context.SaveChanges();
-
-            var client = new IdentityServer4.Models.Client
-            {
-                ClientId = user.Name,
-                ClientName = user.Name,
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-                ClientSecrets = new List<IdentityServer4.Models.Secret> {new IdentityServer4.Models.Secret(plainPassword.Sha256())}, 
-                AllowedScopes = new List<string> {user.Role}
-            };
-
-            _configurationContext.Clients.Add(client.ToEntity());
-            _configurationContext.SaveChanges();
+            _context.SaveChanges();      
             
         }
 
@@ -74,5 +67,6 @@ namespace iread_identity_ms.DataAccess.Repo
             return _context.ApplicationUsers.Any(u => u.Id == id);
         }
 
+        
     }
 }

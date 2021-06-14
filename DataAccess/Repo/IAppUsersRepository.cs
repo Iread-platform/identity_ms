@@ -10,13 +10,13 @@ namespace iread_identity_ms.DataAccess.Repo
 
         public Task<ApplicationUser> GetByEmail(string email);
 
-        public void Insert(ApplicationUser user, string plainPassword);
+        public void Insert(ApplicationUser user);
 
         public Task<List<ApplicationUser>> GetAll();
 
         public void Delete(ApplicationUser user);
 
         public bool Exists(string id);
-
+        public Task<ApplicationUser> GetByName(string userName);
     }
 }

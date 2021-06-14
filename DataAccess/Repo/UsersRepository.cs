@@ -18,15 +18,17 @@ namespace iread_identity_ms.DataAccess.Repo
 {
     public class UsersRepository:IUsersRepository
     {
-        //private readonly AppDbContext _context;
+        
          private readonly ApplicationDbContext _context;
-         private readonly ConfigurationDbContext _configurationContext;
+         //private readonly ConfigurationDbContext _configurationContext;
         private readonly SecurityService _securityService;
-        public UsersRepository(ApplicationDbContext context, SecurityService securityService, ConfigurationDbContext configurationContext)
+        public UsersRepository(ApplicationDbContext context, SecurityService securityService
+        //, ConfigurationDbContext configurationContext
+        )
         {
             _context = context;
             _securityService = securityService;
-            _configurationContext = configurationContext;
+       //     _configurationContext = configurationContext;
         }
 
         public Task<List<SysUser>> GetAll()
@@ -49,17 +51,17 @@ namespace iread_identity_ms.DataAccess.Repo
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            var client = new IdentityServer4.Models.Client
-            {
-                ClientId = user.Name,
-                ClientName = user.Name,
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-                ClientSecrets = new List<IdentityServer4.Models.Secret> {new IdentityServer4.Models.Secret(plainPassword.Sha256())}, 
-                AllowedScopes = new List<string> {user.Role}
-            };
+            // var client = new IdentityServer4.Models.Client
+            // {
+            //     ClientId = user.Name,
+            //     ClientName = user.Name,
+            //     AllowedGrantTypes = GrantTypes.ClientCredentials,
+            //     ClientSecrets = new List<IdentityServer4.Models.Secret> {new IdentityServer4.Models.Secret(plainPassword.Sha256())}, 
+            //     AllowedScopes = new List<string> {user.Role}
+            // };
 
-            _configurationContext.Clients.Add(client.ToEntity());
-            _configurationContext.SaveChanges();
+            // _configurationContext.Clients.Add(client.ToEntity());
+            // _configurationContext.SaveChanges();
             
         }
 

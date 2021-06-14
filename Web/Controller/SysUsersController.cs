@@ -13,6 +13,8 @@ using iread_identity_ms;
 using iread_identity_ms.DataAccess.Data.Entity;
 using AutoMapper;
 using iread_identity_ms.Web.Util;
+using Microsoft.AspNetCore.Identity;
+using iread_identity_ms.DataAccess;
 
 namespace M3allem.M3allem.Controller
 {
@@ -21,17 +23,26 @@ namespace M3allem.M3allem.Controller
     public class SysUsersController : ControllerBase
     {
         private readonly UsersService _usersService;
-        private readonly AppUsersService _appUsersService;
+       // private readonly AppUsersService _appUsersService;
         private readonly SecurityService _securityService;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPublicRepository _repository;
 
-        public SysUsersController(AppUsersService appUsersService, UsersService usersService, SecurityService securityService,
-             IMapper mapper)
+
+        public SysUsersController(
+            IPublicRepository repository, 
+            //AppUsersService appUsersService, 
+            UsersService usersService, SecurityService securityService,
+             IMapper mapper,
+             UserManager<ApplicationUser> userManager)
         {
             _usersService = usersService;
             _securityService = securityService;
-            _appUsersService = appUsersService;
+           // _appUsersService = appUsersService;
             _mapper = mapper;
+            _userManager = userManager;
+            _repository = repository;
         }
 
         // GET: api/SysUsers
@@ -100,6 +111,9 @@ namespace M3allem.M3allem.Controller
         [HttpPost]
         public async Task<IActionResult> PostUser([FromBody] UserCreateDto user)
         {
+
+
+           
             if (user == null)
             {
                 return BadRequest();
@@ -140,43 +154,20 @@ namespace M3allem.M3allem.Controller
 
 
 
+
         // POST: api/SysUsers
         [HttpPost("App")]
         public async Task<IActionResult> PostAppUser([FromBody] ApplicationUser userEntity)
         {
-            if (userEntity == null)
+
+            ApplicationUser u = new ApplicationUser { UserName = userEntity.Name, Email = userEntity.Email };
+            var result = await _userManager.CreateAsync(u, userEntity.Password);
+            if (result.Succeeded)
             {
-                return BadRequest();
+                _repository.GetAppUsersRepository.Insert(u);
+               
             }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
-            }
-
-            //var userEntity = _mapper.Map<ApplicationUser>(user);
-            await AppUserFieldValidationAsync(userEntity);
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
-            }
-
-            IActionResult response = BadRequest();
-            if (!_appUsersService.Insert(userEntity))
-            {
-                return BadRequest();
-            }
-
-            if (userEntity != null)
-            {
-                response = Ok(new
-                {
-                    userDetails = _mapper.Map<UserDto>(userEntity),
-                });
-            }
-
-            return response;
+                return Ok(u);
         }
 
 
@@ -219,14 +210,14 @@ namespace M3allem.M3allem.Controller
             }
         }
 
-         private async Task AppUserFieldValidationAsync(ApplicationUser user)
-        {
+        //  private async Task AppUserFieldValidationAsync(ApplicationUser user)
+        // {
  
-            var similarUser = await _appUsersService.GetByEmail(user.Email);
-            if (similarUser != null)
-            {
-                ModelState.AddModelError("email", "Email already exist");
-            }
-        }
+        //     var similarUser = await _appUsersService.GetByEmail(user.Email);
+        //     if (similarUser != null)
+        //     {
+        //         ModelState.AddModelError("email", "Email already exist");
+        //     }
+        // }
     }
 }

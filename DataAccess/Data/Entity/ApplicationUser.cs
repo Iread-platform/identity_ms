@@ -25,6 +25,7 @@ namespace iread_identity_ms.DataAccess.Data.Entity
 
         [Required(AllowEmptyStrings = false)]
         public string Name { get; set; }
-
+        [Column]
+        public bool IsActive { get; set; } = true;
     }
 }
