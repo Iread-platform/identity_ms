@@ -102,7 +102,7 @@ namespace M3allem.M3allem.Controller
         
         // POST: api/SysUsers
         [HttpPost]
-        public async Task<IActionResult> PostUser([FromBody] UserCreateDto user)
+        public async Task<IActionResult> PostUser([FromBody] ApplicationUser user)
         {
 
             if (user == null)
@@ -115,8 +115,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            var userEntity = _mapper.Map<ApplicationUser>(user);
-            await UserFieldValidationAsync(userEntity);
+            await UserFieldValidationAsync(user);
 
             if (!ModelState.IsValid)
             {
@@ -124,7 +123,7 @@ namespace M3allem.M3allem.Controller
             }
 
             IActionResult response = BadRequest();
-            if (!_usersService.Insert(userEntity))
+            if (!_usersService.Insert(user))
             {
                 return BadRequest();
             }
@@ -144,10 +143,7 @@ namespace M3allem.M3allem.Controller
     //     Console.WriteLine(tokenResponse.Json);
     //     Console.WriteLine("\n\n");
 
-                response = Ok(new
-                {
-                    userDetails = _mapper.Map<UserDto>(userEntity),
-                });
+                response = Ok(user);
             }
 
             return response;
