@@ -156,7 +156,6 @@ namespace iread_identity_ms
 
             // for idntity server 4
             services.AddScoped<UserManager<ApplicationUser>>();
-            //services.AddScoped<RoleManager<UserRole>>();
             services.AddScoped<PasswordHasher<ApplicationUser>>();
             services.AddTransient<IResourceOwnerPasswordValidator, ResourceOwnerPasswordValidator>();
             services.AddTransient<IProfileService, ProfileService>();

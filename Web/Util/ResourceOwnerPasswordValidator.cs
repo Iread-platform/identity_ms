@@ -10,7 +10,6 @@ using iread_identity_ms.DataAccess.Data.Entity;
 namespace iread_identity_ms.Web.Util{
     public class ResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
-    //repository to get user from db
     private readonly IPublicRepository _userRepository;
 
     public ResourceOwnerPasswordValidator(IPublicRepository userRepository)
@@ -31,7 +30,7 @@ namespace iread_identity_ms.Web.Util{
                 if (user.Password == context.Password) {
                     //set the result
                     context.Result = new GrantValidationResult(
-                        subject: user.UserId.ToString(),
+                        subject: user.Id.ToString(),
                         authenticationMethod: "custom", 
                         claims: GetUserClaims(user));
 
@@ -44,8 +43,8 @@ namespace iread_identity_ms.Web.Util{
             context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant, "User does not exist.");
             return;
         }
-        catch (Exception ex)
-        {
+        catch (Exception)
+            {
             context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant, "Invalid username or password");
         }
     }
@@ -55,10 +54,9 @@ namespace iread_identity_ms.Web.Util{
     {
         return new Claim[]
         {
-            new Claim("user_id", user.UserId.ToString() ?? ""),
+            new Claim("user_id", user.Id.ToString() ?? ""),
             new Claim(JwtClaimTypes.GivenName, user.Name  ?? ""),
             new Claim(JwtClaimTypes.Email, user.Email  ?? ""),
-
             //roles
             new Claim(JwtClaimTypes.Role, user.Role)
         };

@@ -19,7 +19,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace iread_identity_ms.DataAccess.Data{
  
  public static class InitializeDatabase {
- public static void Run(IApplicationBuilder app)
+    
+    
+    public static void Run(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
@@ -30,33 +32,6 @@ namespace iread_identity_ms.DataAccess.Data{
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
                 var applicationDbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.Database.Migrate();
-                
-
-
-                // var RoleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<UserRole>>();
-                // IdentityResult adminRoleResult;
-                // IdentityResult teacherRoleResult;
-                // IdentityResult studentRoleResult;
-
-
-                // bool adminRoleExists = await RoleManager.RoleExistsAsync(Policies.Administrator);
-                // bool teacherRoleExists = await RoleManager.RoleExistsAsync(Policies.Teacher);
-                // bool studentRoleExists = await RoleManager.RoleExistsAsync(Policies.Student);
-                
-                // if (!adminRoleExists) {
-                //     adminRoleResult = await RoleManager.CreateAsync(new IdentityRole(Policies.Administrator));
-                // }
-
-                // if(!teacherRoleExists) {
-                //     teacherRoleResult = await RoleManager.CreateAsync(new IdentityRole(Policies.Teacher));
-                // }
-
-                // if(!studentRoleExists) {
-                //     studentRoleResult = await RoleManager.CreateAsync(new IdentityRole(Policies.Student));
-                // }
-
-
-
 
                 if (!context.Clients.Any())
                 {
@@ -99,18 +74,16 @@ namespace iread_identity_ms.DataAccess.Data{
                     ApplicationUser applicationUser = new ApplicationUser();
                     Guid guid = Guid.NewGuid();
                     applicationUser.Id = guid.ToString();
-                    applicationUser.UserName = "scott";
+                    applicationUser.UserName = "test";
                     applicationUser.Name = "scott";
                     applicationUser.Role = "Teacher";
                     applicationUser.Password = "password";
-                    applicationUser.Email = "wx@hotmail.com";
-                    applicationUser.NormalizedUserName = "wx@hotmail.com";
+                    applicationUser.Email = "scott@gmail.com";
+                    applicationUser.NormalizedUserName = "scott@gmail.com";
                     applicationDbContext.ApplicationUsers.Add(applicationUser);
                     var hasedPassword = passwordHasher.HashPassword(applicationUser, "password");
                     applicationUser.SecurityStamp = Guid.NewGuid().ToString();
                     applicationUser.PasswordHash = hasedPassword;
-
-                    //userManager.AddToRoleAsync(applicationUser, Policies.Administrator);
                     applicationDbContext.SaveChanges();
 
                 }
@@ -119,86 +92,89 @@ namespace iread_identity_ms.DataAccess.Data{
         }
     }
 
-    
- internal class Clients
-{
-    public static IEnumerable<Client> Get()
+        
+    internal class Clients
     {
-        return new List<Client>
+        public static IEnumerable<Client> Get()
         {
-           new Client
+            return new List<Client>
             {
-                ClientId = "iread_identity_ms",
-                ClientName = "identity ms client application using password grant types",
-                AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
-                ClientSecrets = new List<Secret> {new Secret("123456".Sha256())},
-                AllowedScopes = new List<string> {"roles",Policies.Administrator,Policies.Student,Policies.Teacher}
-            }
-        };
-    }
-}
-
-internal class Resources
-{
-    public static IEnumerable<IdentityResource> GetIdentityResources()
-    {
-        return new[]
-        {
-            new IdentityResources.OpenId(),
-            new IdentityResources.Profile(),
-            new IdentityResources.Email(),
-            new IdentityResource
-            {
-                Name = "roles",
-                UserClaims = new List<string> {Policies.Administrator,Policies.Student,Policies.Teacher}
-            }
-        };
-    }
-
-    public static IEnumerable<ApiResource> GetApiResources()
-    {
-        return new[]
-        {
-            new ApiResource
-            {
-                Name = "api1",
-                DisplayName = "API #1",
-                Description = "Allow the application to access API #1 on your behalf",
-                Scopes = new List<string> {Policies.Administrator, Policies.Student, Policies.Teacher, "api1.read", "api1.write"},
-                ApiSecrets = new List<Secret> {new Secret("ScopeSecret".Sha256())},
-                UserClaims = new List<string> {"role"}
-            }
-        };
-    }
-	
-	public static IEnumerable<ApiScope> GetApiScopes()
-    {
-        return new[]
-        {
-            new ApiScope(Policies.Administrator, Policies.Administrator),
-            new ApiScope(Policies.Student, Policies.Student),
-            new ApiScope(Policies.Teacher, Policies.Teacher),
-            new ApiScope("api1.read", "Read Access to API #1"),
-			new ApiScope("api1.write", "Write Access to API #1")
-        };
-    }
-
-}
-internal class Users
-{
-    public static List<TestUser> Get()
-    {
-        return new List<TestUser> {
-            new TestUser {
-                SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
-                Username = "scott",
-                Password = "password",
-                Claims = new List<Claim> {
-                    new Claim(JwtClaimTypes.Email, "scott@scottbrady91.com"),
-                    new Claim(JwtClaimTypes.Role, "admin")
+            new Client
+                {
+                    ClientId = "iread_identity_ms",
+                    ClientName = "identity ms client application using password grant types",
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
+                    ClientSecrets = new List<Secret> {new Secret("!re@d".Sha256())},
+                    AllowedScopes = new List<string> {"roles",Policies.Administrator,Policies.Student,Policies.Teacher}
                 }
-            }
-        };
+            };
+        }
     }
-}
+
+    internal class Resources
+    {
+        public static IEnumerable<IdentityResource> GetIdentityResources()
+        {
+            return new[]
+            {
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile(),
+                new IdentityResources.Email(),
+                new IdentityResource
+                {
+                    Name = "roles",
+                    UserClaims = new List<string> {Policies.Administrator,Policies.Student,Policies.Teacher}
+                }
+            };
+        }
+
+        public static IEnumerable<ApiResource> GetApiResources()
+        {
+            return new[]
+            {
+                new ApiResource
+                {
+                    Name = "api1",
+                    DisplayName = "API #1",
+                    Description = "Allow the application to access API #1 on your behalf",
+                    Scopes = new List<string> {Policies.Administrator, Policies.Student, Policies.Teacher, "api1.read", "api1.write"},
+                    ApiSecrets = new List<Secret> {new Secret("ScopeSecret".Sha256())},
+                    UserClaims = new List<string> {"role"}
+                }
+            };
+        }
+        
+        public static IEnumerable<ApiScope> GetApiScopes()
+        {
+            return new[]
+            {
+                new ApiScope(Policies.Administrator, Policies.Administrator),
+                new ApiScope(Policies.Student, Policies.Student),
+                new ApiScope(Policies.Teacher, Policies.Teacher),
+                new ApiScope("api1.read", "Read Access to API #1"),
+                new ApiScope("api1.write", "Write Access to API #1")
+            };
+        }
+
+    }
+    
+    // Used In memory method
+    internal class Users
+    {
+        public static List<TestUser> Get()
+        {
+            return new List<TestUser> {
+                new TestUser {
+                    SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
+                    Username = "test",
+                    Password = "password",
+                    Claims = new List<Claim> {
+                        new Claim(JwtClaimTypes.Email, "test@gmail.com"),
+                        new Claim(JwtClaimTypes.Role, "admin")
+                    }
+                }
+            };
+        }
+    }
+ 
  }

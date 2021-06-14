@@ -8,11 +8,6 @@ namespace iread_identity_ms.DataAccess.Data.Entity
     public class ApplicationUser : IdentityUser{
 
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
-        public int UserId { get; set; }
-
         [Required(AllowEmptyStrings = true)]
         public string Password { get; set; }
         
@@ -22,6 +17,5 @@ namespace iread_identity_ms.DataAccess.Data.Entity
 
         [Required(AllowEmptyStrings = false)]
         public string Name { get; set; }
-        public bool IsActive { get; set; } = true;
     }
 }
