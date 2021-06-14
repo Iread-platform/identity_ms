@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
@@ -30,6 +31,33 @@ namespace iread_identity_ms.DataAccess.Data{
                 var applicationDbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.Database.Migrate();
                 
+
+
+                // var RoleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<UserRole>>();
+                // IdentityResult adminRoleResult;
+                // IdentityResult teacherRoleResult;
+                // IdentityResult studentRoleResult;
+
+
+                // bool adminRoleExists = await RoleManager.RoleExistsAsync(Policies.Administrator);
+                // bool teacherRoleExists = await RoleManager.RoleExistsAsync(Policies.Teacher);
+                // bool studentRoleExists = await RoleManager.RoleExistsAsync(Policies.Student);
+                
+                // if (!adminRoleExists) {
+                //     adminRoleResult = await RoleManager.CreateAsync(new IdentityRole(Policies.Administrator));
+                // }
+
+                // if(!teacherRoleExists) {
+                //     teacherRoleResult = await RoleManager.CreateAsync(new IdentityRole(Policies.Teacher));
+                // }
+
+                // if(!studentRoleExists) {
+                //     studentRoleResult = await RoleManager.CreateAsync(new IdentityRole(Policies.Student));
+                // }
+
+
+
+
                 if (!context.Clients.Any())
                 {
                     foreach (var client in Clients.Get())
@@ -82,7 +110,9 @@ namespace iread_identity_ms.DataAccess.Data{
                     applicationUser.SecurityStamp = Guid.NewGuid().ToString();
                     applicationUser.PasswordHash = hasedPassword;
 
+                    //userManager.AddToRoleAsync(applicationUser, Policies.Administrator);
                     applicationDbContext.SaveChanges();
+
                 }
                 
             }
@@ -102,7 +132,7 @@ namespace iread_identity_ms.DataAccess.Data{
                 ClientName = "identity ms client application using password grant types",
                 AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
                 ClientSecrets = new List<Secret> {new Secret("123456".Sha256())},
-                AllowedScopes = new List<string> {Policies.Administrator,Policies.Student,Policies.Teacher}
+                AllowedScopes = new List<string> {"roles",Policies.Administrator,Policies.Student,Policies.Teacher}
             }
         };
     }
@@ -119,8 +149,8 @@ internal class Resources
             new IdentityResources.Email(),
             new IdentityResource
             {
-                Name = "role",
-                UserClaims = new List<string> {"role"}
+                Name = "roles",
+                UserClaims = new List<string> {Policies.Administrator,Policies.Student,Policies.Teacher}
             }
         };
     }
