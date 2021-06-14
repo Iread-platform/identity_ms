@@ -2,14 +2,14 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.AspNetIdentity;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using iread_identity_ms.DataAccess;
 
 
-namespace iread_identity_ms.Web.Util{
-public class ProfileService : IProfileService
+namespace iread_identity_ms.Web.Util
+{
+    public class ProfileService : IProfileService
 {
     //services
     private readonly IPublicRepository _userRepository;

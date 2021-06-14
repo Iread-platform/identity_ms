@@ -2,17 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.Entities;
 using iread_identity_ms.DataAccess.Data;
 using iread_identity_ms.DataAccess.Data.Entity;
-using iread_identity_ms.Web.Service;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using IdentityServer4.Models;
-using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.EntityFramework.DbContexts;
-using Microsoft.Extensions.DependencyInjection;
-using iread_identity_ms.Web.Util;
+using Microsoft.AspNetCore.Identity;
 
 namespace iread_identity_ms.DataAccess.Repo
 {
@@ -20,12 +14,15 @@ namespace iread_identity_ms.DataAccess.Repo
     {
          private readonly ApplicationDbContext _context;
          private readonly ConfigurationDbContext _configurationContext;
-        private readonly SecurityService _securityService;
-        public AppUsersRepository(ApplicationDbContext context, SecurityService securityService, ConfigurationDbContext configurationContext)
+         private PasswordHasher<ApplicationUser> _passwordHasher;
+
+        public AppUsersRepository(ApplicationDbContext context,
+        PasswordHasher<ApplicationUser> passwordHasher,
+         ConfigurationDbContext configurationContext)
         {
             _context = context;
-            _securityService = securityService;
             _configurationContext = configurationContext;
+            _passwordHasher = passwordHasher;
         }
 
         public Task<List<ApplicationUser>> GetAll()
@@ -50,8 +47,16 @@ namespace iread_identity_ms.DataAccess.Repo
 
         public void Insert(ApplicationUser user)
         {
-            _context.ApplicationUsers.Add(user);
-            _context.SaveChanges();      
+                Guid guid = Guid.NewGuid();
+                user.Id = guid.ToString();
+                user.Name = user.Email;
+                user.NormalizedUserName = user.Email;
+                _context.ApplicationUsers.Add(user);
+                var hasedPassword = _passwordHasher.HashPassword(user, user.Password);
+                user.SecurityStamp = Guid.NewGuid().ToString();
+                user.PasswordHash = hasedPassword;
+                user.UserName = user.Name;
+                _context.SaveChanges();
             
         }
 
