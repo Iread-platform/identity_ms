@@ -22,27 +22,20 @@ namespace M3allem.M3allem.Controller
     [ApiController]
     public class SysUsersController : ControllerBase
     {
-        private readonly UsersService _usersService;
-       // private readonly AppUsersService _appUsersService;
-        private readonly SecurityService _securityService;
+        private readonly AppUsersService _usersService;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IPublicRepository _repository;
 
 
         public SysUsersController(
             IPublicRepository repository, 
-            //AppUsersService appUsersService, 
-            UsersService usersService, SecurityService securityService,
+            AppUsersService usersService, 
              IMapper mapper,
              UserManager<ApplicationUser> userManager)
         {
             _usersService = usersService;
-            _securityService = securityService;
-           // _appUsersService = appUsersService;
             _mapper = mapper;
             _userManager = userManager;
-            _repository = repository;
         }
 
         // GET: api/SysUsers
@@ -112,8 +105,6 @@ namespace M3allem.M3allem.Controller
         public async Task<IActionResult> PostUser([FromBody] UserCreateDto user)
         {
 
-
-           
             if (user == null)
             {
                 return BadRequest();
@@ -124,7 +115,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            var userEntity = _mapper.Map<SysUser>(user);
+            var userEntity = _mapper.Map<ApplicationUser>(user);
             await UserFieldValidationAsync(userEntity);
 
             if (!ModelState.IsValid)
@@ -140,39 +131,27 @@ namespace M3allem.M3allem.Controller
 
             if (user != null)
             {
-                var tokenString = _securityService.GenerateJWTToken(userEntity);
+    // request token
+    //     var tokenClient = new TokenClient("http://localhost:5000/connect/token", "ro.client", "secret");
+    //     var tokenResponse = await tokenClient.RequestResourceOwnerPasswordAsync("alice", "password", "api1");
+
+    //     if (tokenResponse.IsError)
+    //     {
+    //         Console.WriteLine(tokenResponse.Error);
+    //         return;
+    //     }
+
+    //     Console.WriteLine(tokenResponse.Json);
+    //     Console.WriteLine("\n\n");
 
                 response = Ok(new
                 {
-                    token = tokenString,
                     userDetails = _mapper.Map<UserDto>(userEntity),
                 });
             }
 
             return response;
         }
-
-
-
-
-        // POST: api/SysUsers
-        [HttpPost("App")]
-        public async Task<IActionResult> PostAppUser([FromBody] ApplicationUser userEntity)
-        {
-
-            ApplicationUser u = new ApplicationUser { UserName = userEntity.Name, Email = userEntity.Email };
-            var result = await _userManager.CreateAsync(u, userEntity.Password);
-            if (result.Succeeded)
-            {
-                _repository.GetAppUsersRepository.Insert(u);
-               
-            }
-                return Ok(u);
-        }
-
-
-
-
         
 
         // DELETE: api/SysUsers/5
@@ -200,7 +179,7 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        private async Task UserFieldValidationAsync(SysUser user)
+        private async Task UserFieldValidationAsync(ApplicationUser user)
         {
  
             var similarUser = await _usersService.GetByEmail(user.Email);
@@ -209,15 +188,5 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("email", "Email already exist");
             }
         }
-
-        //  private async Task AppUserFieldValidationAsync(ApplicationUser user)
-        // {
- 
-        //     var similarUser = await _appUsersService.GetByEmail(user.Email);
-        //     if (similarUser != null)
-        //     {
-        //         ModelState.AddModelError("email", "Email already exist");
-        //     }
-        // }
     }
 }

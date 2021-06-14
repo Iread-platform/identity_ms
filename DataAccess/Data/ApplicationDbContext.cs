@@ -1,4 +1,3 @@
-
 using iread_identity_ms.DataAccess.Data.Entity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +20,6 @@ namespace iread_identity_ms.DataAccess.Data
     }
 
     //entities
-         public DbSet<SysUser> Users { get; set; }
          public DbSet<ApplicationUser> ApplicationUsers {get; set;}
     }
 }

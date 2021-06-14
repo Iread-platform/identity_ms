@@ -15,9 +15,6 @@ namespace iread_identity_ms.DataAccess.Data.Entity
 
         [Required(AllowEmptyStrings = true)]
         public string Password { get; set; }
-  
-       [Column(TypeName = "varbinary(128)")]
-        public byte[] StoredSalt { get; set; }
         
         [Required]
         [EnumDataType(typeof(RoleTypes), ErrorMessage = "Role type value doesn't exist within enum should be one of [Administrator, Teacher, Student]")]
@@ -25,7 +22,6 @@ namespace iread_identity_ms.DataAccess.Data.Entity
 
         [Required(AllowEmptyStrings = false)]
         public string Name { get; set; }
-        [Column]
         public bool IsActive { get; set; } = true;
     }
 }

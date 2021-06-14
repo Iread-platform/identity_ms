@@ -1,22 +1,16 @@
 ﻿using Consul;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace iread_story.Web.Util
 {
-	public static class ServiceDiscoveryExtension
+    public static class ServiceDiscoveryExtension
 	{
 		public static IServiceCollection AddConsulConfig(this IServiceCollection services, IConfiguration configuration)
 		{
