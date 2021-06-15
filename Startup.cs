@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using Consul;
+using IdentityServer4.Services;
+using IdentityServer4.Validation;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data;
-using iread_identity_ms.DataAccess.Repo;
+using iread_identity_ms.DataAccess.Data.Entity;
 using iread_identity_ms.Web.Dto;
 using iread_identity_ms.Web.Service;
 using iread_identity_ms.Web.Util;
@@ -16,7 +18,7 @@ using iread_story.Web.Util;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 
 namespace iread_identity_ms
 {
@@ -52,14 +55,8 @@ namespace iread_identity_ms
         {
 
             // for routing the request
-            //services.AddMvc(); // core version 2
             services.AddMvc(options => options.EnableEndpointRouting = false); // core version 3 and up
 
-
-            // for connection of DB
-            services.AddDbContext<AppDbContext>(
-                options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
-                });
             
             // for consul
             services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
@@ -101,7 +98,6 @@ namespace iread_identity_ms
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 
-
             // for Auto Mapper configurations
             var mapperConfig = new MapperConfiguration(mc =>
             {
@@ -132,17 +128,71 @@ namespace iread_identity_ms
                 config.AddPolicy(Policies.Teacher, Policies.TeacherPolicy());
                 config.AddPolicy(Policies.Student, Policies.StudentPolicy());
             });
-            
 
-            services.AddScoped<SecurityService>();
-            services.AddScoped<UsersService>();
+            // for service of iread identiy ms
+            services.AddScoped<AppUsersService>();
             services.AddScoped<IPublicRepository, PublicRepository>();
+            
+            
+//////////////////////////////////////////////////////////////////////////////////
+//                     in memory data store for identity server 4               //
+//////////////////////////////////////////////////////////////////////////////////
+            // services.AddIdentityServer()
+            // .AddInMemoryClients(Clients.Get())                         
+            // .AddInMemoryIdentityResources(Resources.GetIdentityResources())
+            // .AddInMemoryApiResources(Resources.GetApiResources())
+            // .AddInMemoryApiScopes(Resources.GetApiScopes())
+            // .AddTestUsers(Users.Get())                     
+            // .AddDeveloperSigningCredential();
+            // // for connection of DB
+            //      services.AddDbContext<ApplicationDbContext>(
+            //          options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
+            //          });
 
+//////////////////////////////////////////////////////////////////////////////////
+//                                      finish                                  //
+//////////////////////////////////////////////////////////////////////////////////
+
+
+            // for idntity server 4
+            services.AddScoped<UserManager<ApplicationUser>>();
+            services.AddScoped<PasswordHasher<ApplicationUser>>();
+            services.AddTransient<IResourceOwnerPasswordValidator, ResourceOwnerPasswordValidator>();
+            services.AddTransient<IProfileService, ProfileService>();
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySQL(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentityCore<ApplicationUser>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+            string migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+            services.AddIdentityServer()
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = builder =>
+                       builder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"),
+                       sql => sql.MigrationsAssembly(migrationsAssembly));
+                })
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = builder =>
+                        builder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"),
+                        sql => sql.MigrationsAssembly(migrationsAssembly));
+                    // this enables automatic token cleanup. this is optional.
+                    options.EnableTokenCleanup = true;
+                    options.TokenCleanupInterval = 30;
+                }).AddDeveloperSigningCredential()
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+            ;
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+
+         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            // Add framework services.
+           InitializeDatabase.Run(app);
+           
            if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -153,7 +203,7 @@ namespace iread_identity_ms
             // enable auto database updates when run the application (after add migrations)
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.Database.Migrate();
             }
 
@@ -163,6 +213,9 @@ namespace iread_identity_ms
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            
+
+            app.UseIdentityServer();
 
             app.UseEndpoints(endpoints =>
             {
@@ -178,4 +231,5 @@ namespace iread_identity_ms
 
         }
     }
+
 }

@@ -1,25 +1,36 @@
+using IdentityServer4.EntityFramework.DbContexts;
 using iread_identity_ms.DataAccess.Data;
 using iread_identity_ms.DataAccess.Repo;
 using iread_identity_ms.Web.Service;
+using IdentityServer4.Models;
+using IdentityServer4.EntityFramework.Mappers;
+using Microsoft.AspNetCore.Identity;
+using iread_identity_ms.DataAccess.Data.Entity;
 
 namespace iread_identity_ms.DataAccess
 {
     public class PublicRepository:IPublicRepository
     {
-        private readonly AppDbContext _context;
-        private readonly SecurityService _securityService;
-        private IUsersRepository _usersRepository;
+        private readonly ApplicationDbContext _context;
+        private readonly ConfigurationDbContext _configurationContext;
+         private readonly PasswordHasher<ApplicationUser> _passwordHasher;
+        private IAppUsersRepository _appUsersRepository;
 
-        public PublicRepository(AppDbContext context, SecurityService securityService)
+
+        public PublicRepository( ApplicationDbContext context,
+         PasswordHasher<ApplicationUser> passwordHasher,
+         ConfigurationDbContext configurationContext
+        )
         {
             _context = context;
-            _securityService = securityService;
+            _passwordHasher = passwordHasher;
+            _configurationContext = configurationContext;
         }
 
-        public IUsersRepository getUsersRepository {
+        public IAppUsersRepository GetAppUsersRepository {
             get
             {
-                return _usersRepository ??= new UsersRepository(_context,_securityService);
+                return _appUsersRepository ??= new AppUsersRepository(_context, _passwordHasher, _configurationContext);
             }
         }
 

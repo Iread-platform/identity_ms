@@ -13,6 +13,8 @@ using iread_identity_ms;
 using iread_identity_ms.DataAccess.Data.Entity;
 using AutoMapper;
 using iread_identity_ms.Web.Util;
+using Microsoft.AspNetCore.Identity;
+using iread_identity_ms.DataAccess;
 
 namespace M3allem.M3allem.Controller
 {
@@ -20,16 +22,20 @@ namespace M3allem.M3allem.Controller
     [ApiController]
     public class SysUsersController : ControllerBase
     {
-        private readonly UsersService _usersService;
-        private readonly SecurityService _securityService;
+        private readonly AppUsersService _usersService;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SysUsersController(UsersService usersService, SecurityService securityService,
-             IMapper mapper)
+
+        public SysUsersController(
+            IPublicRepository repository, 
+            AppUsersService usersService, 
+             IMapper mapper,
+             UserManager<ApplicationUser> userManager)
         {
             _usersService = usersService;
-            _securityService = securityService;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         // GET: api/SysUsers
@@ -96,8 +102,9 @@ namespace M3allem.M3allem.Controller
         
         // POST: api/SysUsers
         [HttpPost]
-        public async Task<IActionResult> PostUser([FromBody] UserCreateDto user)
+        public async Task<IActionResult> PostUser([FromBody] ApplicationUser user)
         {
+
             if (user == null)
             {
                 return BadRequest();
@@ -108,8 +115,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            var userEntity = _mapper.Map<SysUser>(user);
-            await UserFieldValidationAsync(userEntity);
+            await UserFieldValidationAsync(user);
 
             if (!ModelState.IsValid)
             {
@@ -117,24 +123,32 @@ namespace M3allem.M3allem.Controller
             }
 
             IActionResult response = BadRequest();
-            if (!_usersService.Insert(userEntity))
+            if (!_usersService.Insert(user))
             {
                 return BadRequest();
             }
 
             if (user != null)
             {
-                var tokenString = _securityService.GenerateJWTToken(userEntity);
+    // request token
+    //     var tokenClient = new TokenClient("http://localhost:5000/connect/token", "ro.client", "secret");
+    //     var tokenResponse = await tokenClient.RequestResourceOwnerPasswordAsync("alice", "password", "api1");
 
-                response = Ok(new
-                {
-                    token = tokenString,
-                    userDetails = _mapper.Map<UserDto>(userEntity),
-                });
+    //     if (tokenResponse.IsError)
+    //     {
+    //         Console.WriteLine(tokenResponse.Error);
+    //         return;
+    //     }
+
+    //     Console.WriteLine(tokenResponse.Json);
+    //     Console.WriteLine("\n\n");
+
+                response = Ok(user);
             }
 
             return response;
         }
+        
 
         // DELETE: api/SysUsers/5
         [HttpDelete("{id}")]
@@ -161,7 +175,7 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        private async Task UserFieldValidationAsync(SysUser user)
+        private async Task UserFieldValidationAsync(ApplicationUser user)
         {
  
             var similarUser = await _usersService.GetByEmail(user.Email);

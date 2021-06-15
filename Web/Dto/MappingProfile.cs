@@ -7,9 +7,8 @@ namespace iread_identity_ms.Web.Dto{
     {
         public MappingProfile()
         {
-            CreateMap<SysUser, UserDto>();
-            CreateMap<UserDto, SysUser>();
-            CreateMap<UserCreateDto, SysUser>();
+            CreateMap<ApplicationUser, UserDto>();
+            CreateMap<UserDto, ApplicationUser>();
             
         }
     }
