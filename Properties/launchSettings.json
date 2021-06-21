@@ -13,7 +13,8 @@
 
   "ConsulConfig": {
     "Host": "http://localhost:8500",
-    "ServiceName": "identity_ms"
+    "ServiceName": "identity_ms",
+    "MyHost":"localhost"
   },
 
   "ConnectionStrings": {

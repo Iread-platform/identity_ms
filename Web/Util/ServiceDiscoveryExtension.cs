@@ -42,6 +42,7 @@ namespace iread_story.Web.Util
 
 
 			var serviceName = configuration.GetValue<string>("ConsulConfig:ServiceName");
+			var myHost = configuration.GetValue<string>("ConsulConfig:MyHost");
 			var uri = new Uri(address);
 
 
@@ -49,7 +50,9 @@ namespace iread_story.Web.Util
 			{
 				DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
 				Interval = TimeSpan.FromSeconds(10),
-				HTTP = $"{address}/HealthCheck"
+				HTTP = myHost.Equals("localhost") ? 
+				"http://"+myHost+$":{uri.Port}"+"/HealthCheck":
+				"http://"+myHost+"/HealthCheck"
 			};
 
 
@@ -58,7 +61,7 @@ namespace iread_story.Web.Util
 				Checks = new[] {httpCheck},
 				ID = serviceName +":"+ uri.Port,
 				Name = serviceName,
-				Address = $"{uri.Host}",
+				Address = myHost,
 				Port = uri.Port
 			};
 
