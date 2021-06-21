@@ -4,7 +4,7 @@ MAINTAINER Yazan Kassam, yazankassam.codavia@gmail.com
 
 WORKDIR /app
 
-ENV ASPNETCORE_URLS="http://identity_ms"
+ENV ASPNETCORE_URLS="http://[+]:5015"
 
 ENV ASPNETCORE_ENVIRONMENT=Development
 
