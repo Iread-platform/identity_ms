@@ -30,9 +30,9 @@ namespace iread_identity_ms.DataAccess.Repo
             return _context.ApplicationUsers.ToListAsync();
         }
         
-        public async Task<ApplicationUser> GetById(int id)
+        public async Task<ApplicationUser> GetById(string id)
         {
-            return await _context.ApplicationUsers.FindAsync(id);
+            return await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<ApplicationUser> GetByEmail(string email)

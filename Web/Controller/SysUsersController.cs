@@ -18,7 +18,7 @@ using iread_identity_ms.DataAccess;
 
 namespace M3allem.M3allem.Controller
 {
-    [Route("api/[controller]")]
+    [Route("api/identity_ms/[controller]/")]
     [ApiController]
     public class SysUsersController : ControllerBase
     {
@@ -38,8 +38,8 @@ namespace M3allem.M3allem.Controller
             _userManager = userManager;
         }
 
-        // GET: api/SysUsers
-        [HttpGet]
+        // GET: api/SysUsers/all
+        [HttpGet("all")]
         [Authorize(Roles = Policies.Administrator)]
         public async Task<IEnumerable<UserDto>> GetUsers()
         {
@@ -47,8 +47,8 @@ namespace M3allem.M3allem.Controller
         }
         
         
-        // GET: api/SysUsers/ByEmail
-        [HttpGet("ByEmail")]
+        // GET: api/SysUsers/get-by-email
+        [HttpGet("get-by-email")]
         public async Task<IActionResult> GetUserByEmail([FromQuery(Name = "email")] string email)
         {
             if (!ModelState.IsValid)
@@ -79,10 +79,9 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        // GET: api/SysUsers/5
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetUser([FromRoute] int id)
+        // GET: api/SysUsers/5/get
+        [HttpGet("{id}/get")]
+        public async Task<IActionResult> GetUser([FromRoute] string id)
         {
             if (!ModelState.IsValid)
             {
@@ -100,8 +99,8 @@ namespace M3allem.M3allem.Controller
         }
 
         
-        // POST: api/SysUsers
-        [HttpPost]
+        // POST: api/SysUsers/add
+        [HttpPost("add")]
         public async Task<IActionResult> PostUser([FromBody] ApplicationUser user)
         {
 
@@ -151,9 +150,9 @@ namespace M3allem.M3allem.Controller
         
 
         // DELETE: api/SysUsers/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/delete")]
         [Authorize(Roles = Policies.Administrator)]
-        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
         {
             if (!ModelState.IsValid)
             {

@@ -24,7 +24,7 @@ namespace iread_identity_ms.Web.Service
             return await _repository.GetAppUsersRepository.GetAll();
         }
 
-        public async Task<ApplicationUser> GetById(int id)
+        public async Task<ApplicationUser> GetById(string id)
         {
             return await _repository.GetAppUsersRepository.GetById(id);
         }

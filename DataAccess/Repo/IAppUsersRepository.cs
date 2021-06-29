@@ -6,7 +6,7 @@ namespace iread_identity_ms.DataAccess.Repo
 {
     public interface IAppUsersRepository
     {
-        public Task<ApplicationUser> GetById(int id);
+        public Task<ApplicationUser> GetById(string id);
 
         public Task<ApplicationUser> GetByEmail(string email);
 
