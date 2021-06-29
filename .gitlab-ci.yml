@@ -1,0 +1,100 @@
+stages:
+  - build
+  - publish
+  - dockerize
+  - deploy
+
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: never  # Prevent pipeline run for push event
+    - when: always # Run pipeline for all other cases
+
+
+variables:
+  DOCKER_USER_NAME: "yazankassamcodavia"
+  DOCKER_PASSWORD: "yazankassamcod@v!@"
+  DOCKER_ORGANIZATION_NAME: "iread"
+  DOCKER_IMAGE_NAME: "identity_ms"
+  CONTAINER_PORT: "5015"
+
+  
+build:
+  stage: build
+  only:
+    - develop
+    - master
+  image : mcr.microsoft.com/dotnet/sdk:5.0
+  script:
+    - dotnet build
+
+publish:
+  stage: publish
+  only:
+    - develop
+    - master
+  image : mcr.microsoft.com/dotnet/sdk:5.0
+  artifacts:
+    paths:
+      - publish/
+  script:
+    - dotnet publish -o ./publish
+
+
+dockerize_develop:
+  stage: dockerize
+  only:
+    - develop
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - export DOCKER_IMAGE_VER=$(printf "%03d" $CI_PIPELINE_IID | sed 's/.\{1\}/&./g' | sed 's/.$//')
+    - echo "DOCKER IMAGE VERION = $DOCKER_IMAGE_VER"
+    - docker build -f Dockerfile -t "${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VER}" .
+    - docker login --username $DOCKER_USER_NAME --password $DOCKER_PASSWORD
+    - docker push "${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VER}"
+    - echo "DOCKER_IMAGE_AND_TAG=${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VER}" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+
+dockerize_master:
+  stage: dockerize
+  only:
+    - master
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - apk add jq
+  script:
+    - export DOCKER_IMAGE_VER=release-$(jq -r .Release appsettings.json)
+    - echo "DOCKER IMAGE VERION = $DOCKER_IMAGE_VER"
+    - docker build -f Dockerfile -t "${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VER}" .
+    - docker login --username $DOCKER_USER_NAME --password $DOCKER_PASSWORD
+    - docker push "${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VER}"
+    - echo "DOCKER_IMAGE_AND_TAG=${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VER}" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+
+deploy:
+  stage: deploy
+  image: alpine
+  only:
+    - develop
+    - master
+  before_script:
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - echo image name = ${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}
+    - echo container name = ${DOCKER_IMAGE_NAME}
+    - ssh -o StrictHostKeyChecking=no root@46.227.254.20 'bash -s' <  deploy_instructions.sh ${DOCKER_ORGANIZATION_NAME} ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_AND_TAG} ${CONTAINER_PORT}
