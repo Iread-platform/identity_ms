@@ -16,6 +16,9 @@ namespace iread_identity_ms.Web.Dto
             CreateMap<ApplicationUser, RegisterAsTeachertDto>().ForMember(dest =>
             dest.AvatarId,
             opt => opt.MapFrom(src => src.Avatar)).ReverseMap();
+            CreateMap<ApplicationUser, RegisterAsSchoolManager>().ForMember(dest =>
+            dest.AvatarId,
+            opt => opt.MapFrom(src => src.Avatar)).ReverseMap();
 
         }
     }

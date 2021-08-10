@@ -5,6 +5,7 @@ namespace iread_identity_ms.DataAccess.Data.Type
     {
         Student,
         Teacher,
+        SchoolManager,
         Administrator
 
     }

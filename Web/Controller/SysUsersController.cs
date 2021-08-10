@@ -213,6 +213,34 @@ namespace M3allem.M3allem.Controller
             return Ok(teacherEntity);
         }
 
+        // POST: api/SysUsers/RegisterAsSchoolManager
+        [HttpPost("RegisterAsSchoolManager")]
+        public IActionResult RegisterAsSchoolManager([FromBody] RegisterAsSchoolManager schoolManager)
+        {
+
+            if (schoolManager == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            ApplicationUser schoolManagerEntity = _mapper.Map<ApplicationUser>(schoolManager);
+            RegisterValidation(schoolManagerEntity);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            _usersService.CreateSchoolManager(schoolManagerEntity);
+
+            return Ok(schoolManagerEntity);
+        }
+
 
         // DELETE: api/SysUsers/5
         [HttpDelete("{id}/delete")]
