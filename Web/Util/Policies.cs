@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace iread_identity_ms.Web.Util
 {
-    public class Policies 
-    { 
+    public class Policies
+    {
 
         public const string Administrator = "Administrator";
         public const string Teacher = "Teacher";
         public const string Student = "Student";
+        public const string SchoolManager = "SchoolManager";
 
         public static AuthorizationPolicy AdmininstratorPolicy()
         {
@@ -24,6 +25,10 @@ namespace iread_identity_ms.Web.Util
         public static AuthorizationPolicy StudentPolicy()
         {
             return new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireRole(Student).Build();
+        }
+        public static AuthorizationPolicy SchoolManagerPolicy()
+        {
+            return new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireRole(SchoolManager).Build();
         }
     }
 }

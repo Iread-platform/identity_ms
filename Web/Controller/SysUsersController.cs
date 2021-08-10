@@ -87,7 +87,7 @@ namespace M3allem.M3allem.Controller
 
         // GET: api/SysUsers/5/get
         [HttpGet("{id}/get")]
-        public async Task<IActionResult> GetUser([FromRoute] string id)
+        public async Task<IActionResult> GetById([FromRoute] string id)
         {
             if (!ModelState.IsValid)
             {
@@ -105,7 +105,7 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        // POST: api/SysUsers/add
+        /*// POST: api/SysUsers/add
         [HttpPost("add")]
         public async Task<IActionResult> PostUser([FromBody] ApplicationUser user)
         {
@@ -152,7 +152,7 @@ namespace M3allem.M3allem.Controller
             }
 
             return response;
-        }
+        }*/
 
         // POST: api/SysUsers/RegisterAsStudent
         [HttpPost("RegisterAsStudent")]
@@ -180,7 +180,9 @@ namespace M3allem.M3allem.Controller
 
             _usersService.CreateStudent(studentEntity);
 
-            return Ok(studentEntity);
+
+            return CreatedAtAction("GetById", new { id = studentEntity.Id }, _mapper.Map<UserDto>(studentEntity));
+
         }
 
 
@@ -210,7 +212,7 @@ namespace M3allem.M3allem.Controller
 
             _usersService.CreateTeacher(teacherEntity);
 
-            return Ok(teacherEntity);
+            return CreatedAtAction("GetById", new { id = teacherEntity.Id }, _mapper.Map<UserDto>(teacherEntity));
         }
 
         // POST: api/SysUsers/RegisterAsSchoolManager
@@ -238,7 +240,7 @@ namespace M3allem.M3allem.Controller
 
             _usersService.CreateSchoolManager(schoolManagerEntity);
 
-            return Ok(schoolManagerEntity);
+            return CreatedAtAction("GetById", new { id = schoolManagerEntity.Id }, _mapper.Map<UserDto>(schoolManagerEntity));
         }
 
 
