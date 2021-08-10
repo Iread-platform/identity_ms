@@ -57,7 +57,7 @@ namespace iread_identity_ms
             // for routing the request
             services.AddMvc(options => options.EnableEndpointRouting = false); // core version 3 and up
 
-            
+
             // for consul
             services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
             {
@@ -65,21 +65,23 @@ namespace iread_identity_ms
                 consulConfig.Address = new Uri(address);
             }));
             services.AddConsulConfig(Configuration);
+            services.AddHttpClient<IConsulHttpClientService, ConsulHttpClientService>();
 
-            
+
+
             // for swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "iread_identity_ms", Version = "v1" });
             });
 
-             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
-            {
-                builder.SetIsOriginAllowed(x => _ = true)
-                       .AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            }));
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+           {
+               builder.SetIsOriginAllowed(x => _ = true)
+                      .AllowAnyOrigin()
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+           }));
 
             // return only msg of errors as a list when get invalid ModelState in background
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0)
@@ -87,10 +89,10 @@ namespace iread_identity_ms
             {
                 options.InvalidModelStateResponseFactory = (context) =>
                 {
-                var errors = context.ModelState.Values.SelectMany(x => x.Errors.Select (y => y.ErrorMessage));
+                    var errors = context.ModelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage));
                     return new BadRequestObjectResult(errors);
                 };
-           });
+            });
 
             // for stop looping of json result
             services.AddMvc()
@@ -132,11 +134,11 @@ namespace iread_identity_ms
             // for service of iread identiy ms
             services.AddScoped<AppUsersService>();
             services.AddScoped<IPublicRepository, PublicRepository>();
-            
-            
-//////////////////////////////////////////////////////////////////////////////////
-//                     in memory data store for identity server 4               //
-//////////////////////////////////////////////////////////////////////////////////
+
+
+            //////////////////////////////////////////////////////////////////////////////////
+            //                     in memory data store for identity server 4               //
+            //////////////////////////////////////////////////////////////////////////////////
             // services.AddIdentityServer()
             // .AddInMemoryClients(Clients.Get())                         
             // .AddInMemoryIdentityResources(Resources.GetIdentityResources())
@@ -149,9 +151,9 @@ namespace iread_identity_ms
             //          options => { options.UseLoggerFactory(_myLoggerFactory).UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
             //          });
 
-//////////////////////////////////////////////////////////////////////////////////
-//                                      finish                                  //
-//////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////
+            //                                      finish                                  //
+            //////////////////////////////////////////////////////////////////////////////////
 
 
             // for idntity server 4
@@ -186,14 +188,14 @@ namespace iread_identity_ms
         }
 
 
-         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
             // Add framework services.
-           InitializeDatabase.Run(app);
-           
-           if (env.IsDevelopment())
+            InitializeDatabase.Run(app);
+
+            if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
@@ -213,7 +215,7 @@ namespace iread_identity_ms
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
-            
+
 
             app.UseIdentityServer();
 
