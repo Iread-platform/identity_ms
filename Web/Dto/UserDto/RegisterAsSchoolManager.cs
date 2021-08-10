@@ -9,7 +9,10 @@ namespace iread_identity_ms.Web.Dto.UserDto
     {
 
         [Required(AllowEmptyStrings = false)]
-        public string Name { get; set; }
+        public string FirstName { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        public string LastName { get; set; }
 
         [Required(AllowEmptyStrings = true)]
         public string Password { get; set; }
