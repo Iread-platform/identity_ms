@@ -2,10 +2,10 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using iread_identity_ms.DataAccess.Data.Type;
 
-namespace iread_identity_ms.Web.Dto
+namespace iread_identity_ms.Web.Dto.UserDto
 {
 
-    public class RegisterStudentDto
+    public class RegisterAsStudentDto
     {
 
         [Required(AllowEmptyStrings = false)]

@@ -8,15 +8,15 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using iread_identity_ms.DataAccess.Repo;
 using iread_identity_ms.Web.Service;
-using iread_identity_ms.Web.Dto;
+using iread_identity_ms.Web.Dto.UserDto;
 using iread_identity_ms;
 using iread_identity_ms.DataAccess.Data.Entity;
 using AutoMapper;
 using iread_identity_ms.Web.Util;
 using Microsoft.AspNetCore.Identity;
 using iread_identity_ms.DataAccess;
-using iread_interaction_ms.Web.DTO;
 using iread_identity_ms.DataAccess.Data.Type;
+using iread_interaction_ms.Web.DTO.AttachmentDTO;
 
 namespace M3allem.M3allem.Controller
 {
@@ -156,7 +156,7 @@ namespace M3allem.M3allem.Controller
 
         // POST: api/SysUsers/RegisterAsStudent
         [HttpPost("RegisterAsStudent")]
-        public IActionResult RegisterStudent([FromBody] RegisterStudentDto student)
+        public IActionResult RegisterStudent([FromBody] RegisterAsStudentDto student)
         {
 
             if (student == null)
@@ -181,6 +181,36 @@ namespace M3allem.M3allem.Controller
             _usersService.CreateStudent(studentEntity);
 
             return Ok(studentEntity);
+        }
+
+
+        // POST: api/SysUsers/RegisterAsTeacher
+        [HttpPost("RegisterAsTeacher")]
+        public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
+        {
+
+            if (teacher == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            ApplicationUser teacherEntity = _mapper.Map<ApplicationUser>(teacher);
+            RegisterValidation(teacherEntity);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+
+            _usersService.CreateTeacher(teacherEntity);
+
+            return Ok(teacherEntity);
         }
 
 
@@ -239,7 +269,7 @@ namespace M3allem.M3allem.Controller
                 }
                 else
                 {
-                    if (!ImgExtensions.All.Contains(attachmentDto.Extension))
+                    if (!ImgExtensions.All.Contains(attachmentDto.Extension.ToLower()))
                     {
                         ModelState.AddModelError("Audio", "Avatar not have valid extension, should be one of [" + string.Join(",", ImgExtensions.All) + "]");
                     }

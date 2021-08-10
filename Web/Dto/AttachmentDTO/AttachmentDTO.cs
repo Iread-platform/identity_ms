@@ -1,6 +1,6 @@
 using System;
 
-namespace iread_interaction_ms.Web.DTO
+namespace iread_interaction_ms.Web.DTO.AttachmentDTO
 {
     public class AttachmentDTO
     {

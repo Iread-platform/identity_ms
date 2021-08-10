@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using iread_identity_ms.DataAccess.Data.Entity;
+using iread_identity_ms.Web.Dto.UserDto;
 
 namespace iread_identity_ms.Web.Dto
 {
@@ -8,8 +9,11 @@ namespace iread_identity_ms.Web.Dto
     {
         public MappingProfile()
         {
-            CreateMap<ApplicationUser, UserDto>().ReverseMap();
-            CreateMap<ApplicationUser, RegisterStudentDto>().ForMember(dest =>
+            CreateMap<ApplicationUser, UserDto.UserDto>().ReverseMap();
+            CreateMap<ApplicationUser, RegisterAsStudentDto>().ForMember(dest =>
+            dest.AvatarId,
+            opt => opt.MapFrom(src => src.Avatar)).ReverseMap();
+            CreateMap<ApplicationUser, RegisterAsTeachertDto>().ForMember(dest =>
             dest.AvatarId,
             opt => opt.MapFrom(src => src.Avatar)).ReverseMap();
 

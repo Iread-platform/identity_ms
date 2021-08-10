@@ -1,5 +1,5 @@
 
-namespace iread_identity_ms.Web.Dto
+namespace iread_identity_ms.Web.Dto.UserDto
 {
     public class UserDto
     {

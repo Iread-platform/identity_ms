@@ -62,5 +62,11 @@ namespace iread_identity_ms.Web.Service
             studentEntity.Role = RoleTypes.Student.ToString();
             _repository.GetAppUsersRepository.Insert(studentEntity);
         }
+
+        internal void CreateTeacher(ApplicationUser teacherEntity)
+        {
+            teacherEntity.Role = RoleTypes.Teacher.ToString();
+            _repository.GetAppUsersRepository.Insert(teacherEntity);
+        }
     }
 }
