@@ -20,9 +20,9 @@ using iread_interaction_ms.Web.DTO.AttachmentDTO;
 
 namespace M3allem.M3allem.Controller
 {
-    [Route("api/identity_ms/[controller]/")]
+    [Route("api/[controller]/")]
     [ApiController]
-    public class SysUsersController : ControllerBase
+    public class IdentityController : ControllerBase
     {
         private readonly AppUsersService _usersService;
         private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace M3allem.M3allem.Controller
         private readonly UserManager<ApplicationUser> _userManager;
 
 
-        public SysUsersController(
+        public IdentityController(
             IPublicRepository repository,
             AppUsersService usersService,
              IMapper mapper,
@@ -44,7 +44,6 @@ namespace M3allem.M3allem.Controller
             _consulHttpClient = consulHttpClient;
         }
 
-        // GET: api/SysUsers/all
         [HttpGet("all")]
         [Authorize(Roles = Policies.Administrator)]
         public async Task<IEnumerable<UserDto>> GetUsers()
@@ -53,7 +52,6 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        // GET: api/SysUsers/get-by-email
         [HttpGet("get-by-email")]
         public async Task<IActionResult> GetUserByEmail([FromQuery(Name = "email")] string email)
         {
@@ -85,7 +83,6 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        // GET: api/SysUsers/5/get
         [HttpGet("{id}/get")]
         public async Task<IActionResult> GetById([FromRoute] string id)
         {
@@ -154,7 +151,6 @@ namespace M3allem.M3allem.Controller
             return response;
         }*/
 
-        // POST: api/SysUsers/RegisterAsStudent
         [HttpPost("RegisterAsStudent")]
         public IActionResult RegisterStudent([FromBody] RegisterAsStudentDto student)
         {
@@ -186,7 +182,6 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        // POST: api/SysUsers/RegisterAsTeacher
         [HttpPost("RegisterAsTeacher")]
         public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
         {
@@ -215,7 +210,6 @@ namespace M3allem.M3allem.Controller
             return CreatedAtAction("GetById", new { id = teacherEntity.Id }, _mapper.Map<UserDto>(teacherEntity));
         }
 
-        // POST: api/SysUsers/RegisterAsSchoolManager
         [HttpPost("RegisterAsSchoolManager")]
         public IActionResult RegisterAsSchoolManager([FromBody] RegisterAsSchoolManager schoolManager)
         {
@@ -244,7 +238,6 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        // DELETE: api/SysUsers/5
         [HttpDelete("{id}/delete")]
         [Authorize(Roles = Policies.Administrator)]
         public async Task<IActionResult> DeleteUser([FromRoute] string id)
