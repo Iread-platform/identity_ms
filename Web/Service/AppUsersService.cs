@@ -1,8 +1,10 @@
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data.Entity;
+using iread_identity_ms.DataAccess.Data.Type;
 using Microsoft.EntityFrameworkCore;
 
 namespace iread_identity_ms.Web.Service
@@ -29,12 +31,12 @@ namespace iread_identity_ms.Web.Service
             return await _repository.GetAppUsersRepository.GetById(id);
         }
 
-         public bool Insert(ApplicationUser user)
-        {            
+        public bool Insert(ApplicationUser user)
+        {
             try
             {
                 _repository.GetAppUsersRepository.Insert(user);
-                return true; 
+                return true;
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -42,7 +44,7 @@ namespace iread_identity_ms.Web.Service
             }
         }
 
-         public bool Delete(ApplicationUser user)
+        public bool Delete(ApplicationUser user)
         {
             try
             {
@@ -53,6 +55,24 @@ namespace iread_identity_ms.Web.Service
             {
                 return false;
             }
+        }
+
+        public void CreateStudent(ApplicationUser studentEntity)
+        {
+            studentEntity.Role = RoleTypes.Student.ToString();
+            _repository.GetAppUsersRepository.Insert(studentEntity);
+        }
+
+        internal void CreateTeacher(ApplicationUser teacherEntity)
+        {
+            teacherEntity.Role = RoleTypes.Teacher.ToString();
+            _repository.GetAppUsersRepository.Insert(teacherEntity);
+        }
+
+        internal void CreateSchoolManager(ApplicationUser schoolManagerEntity)
+        {
+            schoolManagerEntity.Role = RoleTypes.SchoolManager.ToString();
+            _repository.GetAppUsersRepository.Insert(schoolManagerEntity);
         }
     }
 }

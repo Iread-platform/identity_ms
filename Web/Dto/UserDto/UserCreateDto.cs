@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace iread_identity_ms.Web.Dto
+namespace iread_identity_ms.Web.Dto.UserDto
 {
 
     public class UserCreateDto
