@@ -18,5 +18,6 @@ namespace iread_identity_ms.DataAccess.Repo
 
         public bool Exists(string id);
         public Task<ApplicationUser> GetByName(string userName);
+        public Task<List<ApplicationUser>> GetByRole(string role);
     }
 }

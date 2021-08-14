@@ -52,6 +52,38 @@ namespace M3allem.M3allem.Controller
         }
 
 
+        [HttpGet("get-by-role")]
+        public async Task<IActionResult> GetByRole([FromQuery(Name = "role")] string role)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            if (String.IsNullOrWhiteSpace(role))
+            {
+                ModelState.AddModelError("role", "role is required");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            if (!(Enum.GetNames(typeof(RoleTypes)).ToList().Contains(role)))
+            {
+                ModelState.AddModelError("role", $"role is not valid should be one of [{String.Join(",", Enum.GetNames(typeof(RoleTypes)))}].");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            List<ApplicationUser> users = await _usersService.GetByRole(role);
+
+            if (users == null || !users.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<List<UserDto>>(users));
+        }
+
+
+
         [HttpGet("get-by-email")]
         public async Task<IActionResult> GetUserByEmail([FromQuery(Name = "email")] string email)
         {
