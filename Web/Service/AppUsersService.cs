@@ -74,5 +74,10 @@ namespace iread_identity_ms.Web.Service
             schoolManagerEntity.Role = RoleTypes.SchoolManager.ToString();
             _repository.GetAppUsersRepository.Insert(schoolManagerEntity);
         }
+
+        public async Task<List<ApplicationUser>> GetByRole(string role)
+        {
+            return await _repository.GetAppUsersRepository.GetByRole(role);
+        }
     }
 }
