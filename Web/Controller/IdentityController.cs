@@ -65,10 +65,13 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("role", "role is required");
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-
-            if (!(Enum.GetNames(typeof(RoleTypes)).ToList().Contains(role)))
+            List<string> validRoles = new List<string>(){
+                RoleTypes.Student.ToString(),
+                RoleTypes.Teacher.ToString()
+            };
+            if (!(validRoles.Contains(role)))
             {
-                ModelState.AddModelError("role", $"role is not valid should be one of [{String.Join(",", Enum.GetNames(typeof(RoleTypes)))}].");
+                ModelState.AddModelError("role", $"role is not valid should be one of [{String.Join(",", validRoles.ToArray())}].");
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
