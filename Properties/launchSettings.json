@@ -8,23 +8,18 @@
       "sslPort": 44392
     }
   },
-
-  "Release" : "1",
-
+  "Release": "1",
   "ConsulConfig": {
     "Host": "http://localhost:8500",
     "ServiceName": "identity_ms"
   },
-
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=identity_ms_db;Uid=codavia;Pwd=cod@v!@; convert zero datetime=True"
   },
-
   "Jwt": {
     "SecretKey": "VaibhavBhapkar!1ghtxD3Spri2",
     "ExpiredAfterInHour": "24"
   },
-
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
@@ -39,7 +34,7 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5015",
+      "applicationUrl": "http://192.168.1.118:5015",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

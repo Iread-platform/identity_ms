@@ -54,6 +54,16 @@ namespace iread_identity_ms
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "_myAllowSpecificOrigins", builder =>
+                     builder
+                         .AllowAnyOrigin()
+                         .AllowAnyMethod()
+                         .AllowAnyHeader());
+            });
+
+
             // for routing the request
             services.AddMvc(options => options.EnableEndpointRouting = false); // core version 3 and up
 
@@ -213,7 +223,9 @@ namespace iread_identity_ms
 
             // this order is required for JWT auth
             app.UseAuthentication();
+
             app.UseRouting();
+            app.UseCors("_myAllowSpecificOrigins");
             app.UseAuthorization();
 
 
