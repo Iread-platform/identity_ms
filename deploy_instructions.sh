@@ -41,4 +41,4 @@ echo ======== pull docker image on server ========;
 docker pull ${DOCKER_IMAGE_AND_TAG};
 
 echo ======== run docker container ========;
-docker run -p 46.227.254.20:${CONTAINER_PORT}:${INTERNAL_PORT} --name ${DOCKER_CONTAINER_NAME} --hostname ${DOCKER_CONTAINER_NAME} -d ${DOCKER_IMAGE_AND_TAG};
+docker run -p 217.182.250.236:${CONTAINER_PORT}:${INTERNAL_PORT} --name ${DOCKER_CONTAINER_NAME} --hostname ${DOCKER_CONTAINER_NAME} -d ${DOCKER_IMAGE_AND_TAG};

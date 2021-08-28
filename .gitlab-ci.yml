@@ -97,4 +97,4 @@ deploy:
   script:
     - echo image name = ${DOCKER_ORGANIZATION_NAME}/${DOCKER_IMAGE_NAME}
     - echo container name = ${DOCKER_IMAGE_NAME}
-    - ssh -o StrictHostKeyChecking=no root@46.227.254.20 'bash -s' <  deploy_instructions.sh ${DOCKER_ORGANIZATION_NAME} ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_AND_TAG} ${CONTAINER_PORT}
+    - ssh -o StrictHostKeyChecking=no root@217.182.250.236 'bash -s' <  deploy_instructions.sh ${DOCKER_ORGANIZATION_NAME} ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_AND_TAG} ${CONTAINER_PORT}
