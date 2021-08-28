@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Identity;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data.Type;
 using iread_interaction_ms.Web.DTO.AttachmentDTO;
+using IdentityModel.Client;
+using System.Threading;
 
 namespace M3allem.M3allem.Controller
 {
@@ -136,6 +138,16 @@ namespace M3allem.M3allem.Controller
             return Ok(_mapper.Map<UserDto>(user));
         }
 
+        [HttpGet]
+        [Route("myProfile")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> MyProfileAsync()
+        {
+            string myId = User.Claims.Where(c => c.Type == "sub")
+                             .Select(c => c.Value).SingleOrDefault();
+
+            return Ok(_mapper.Map<UserDto>(await _usersService.GetById(myId)));
+        }
 
         /*// POST: api/SysUsers/add
         [HttpPost("add")]

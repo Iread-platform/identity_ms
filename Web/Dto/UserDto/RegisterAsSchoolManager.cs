@@ -23,5 +23,6 @@ namespace iread_identity_ms.Web.Dto.UserDto
 
         public Nullable<int> AvatarId { get; set; }
 
+
     }
 }

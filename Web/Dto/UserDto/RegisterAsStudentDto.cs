@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using iread_identity_ms.DataAccess.Data.Type;
+using iread_identity_ms.Web.Util;
 
 namespace iread_identity_ms.Web.Dto.UserDto
 {
@@ -22,6 +22,12 @@ namespace iread_identity_ms.Web.Dto.UserDto
         public string Email { get; set; }
 
         public Nullable<int> AvatarId { get; set; }
+
+        [NotDefaultValue(ErrorMessage = "{0} field is required.")]
+        public DateTime BirthDay { get; set; }
+
+        [Required]
+        public Nullable<int> Level { get; set; }
 
     }
 }

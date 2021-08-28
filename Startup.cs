@@ -16,6 +16,7 @@ using iread_identity_ms.Web.Service;
 using iread_identity_ms.Web.Util;
 using iread_story.Web.Util;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -119,27 +120,40 @@ namespace iread_identity_ms
             services.AddSingleton(mapper);
 
             // for JWT config
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            //string url = Startup.Configuration.GetSection("iread_identity_ms")["applicationUrl"].ToString().Split(";").First();
+            services.AddAuthentication("Bearer")
+            .AddIdentityServerAuthentication("Bearer", options =>
             {
+                options.ApiName = "api1";
+                options.Authority = "http://192.168.1.118:5015";
                 options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Startup.Configuration.GetSection("Jwt")["SecretKey"].ToString())),
-                    ClockSkew = TimeSpan.Zero
-                };
             });
-            services.AddAuthorization(config =>
+
+            services.AddAuthorization(options =>
             {
-                config.AddPolicy(Policies.Administrator, Policies.AdmininstratorPolicy());
-                config.AddPolicy(Policies.Teacher, Policies.TeacherPolicy());
-                config.AddPolicy(Policies.Student, Policies.StudentPolicy());
+
+                options.AddPolicy(Policies.Administrator, policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireScope(Policies.Administrator);
+                });
+                options.AddPolicy(Policies.Teacher, policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireScope(Policies.Teacher);
+                });
+                options.AddPolicy(Policies.Student, policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireScope(Policies.Student);
+                });
+                options.AddPolicy(Policies.SchoolManager, policy =>
+               {
+                   policy.RequireAuthenticatedUser();
+                   policy.RequireScope(Policies.SchoolManager);
+               });
             });
+
 
             // for service of iread identiy ms
             services.AddScoped<AppUsersService>();
@@ -244,6 +258,7 @@ namespace iread_identity_ms
             return modelState.Values.SelectMany(x => x.Errors.Select(y => y.ErrorMessage));
 
         }
+
     }
 
 }
