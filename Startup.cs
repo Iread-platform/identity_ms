@@ -120,12 +120,12 @@ namespace iread_identity_ms
             services.AddSingleton(mapper);
 
             // for JWT config
-            //string url = Startup.Configuration.GetSection("iread_identity_ms")["applicationUrl"].ToString().Split(";").First();
+            var url = Startup.Configuration.GetSection("profiles")["iread_identity_ms:applicationUrl"];
             services.AddAuthentication("Bearer")
             .AddIdentityServerAuthentication("Bearer", options =>
             {
                 options.ApiName = "api1";
-                options.Authority = "http://192.168.1.118:5015";
+                options.Authority = url;
                 options.RequireHttpsMetadata = false;
             });
 
