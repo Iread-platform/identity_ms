@@ -20,6 +20,8 @@ namespace iread_identity_ms.DataAccess.Data.Entity
         [Required(AllowEmptyStrings = false)]
         public string Name { get; set; }
         public Nullable<int> Avatar { get; set; }
+        public Nullable<int> CustomPhoto { get; set; }
+
 
         [Required(AllowEmptyStrings = false)]
         public string FirstName { get; set; }

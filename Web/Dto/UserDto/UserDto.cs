@@ -1,5 +1,6 @@
 
 using System;
+using iread_interaction_ms.Web.DTO.AttachmentDTO;
 
 namespace iread_identity_ms.Web.Dto.UserDto
 {
@@ -12,6 +13,9 @@ namespace iread_identity_ms.Web.Dto.UserDto
         public string Email { get; set; }
         public int Level { get; set; }
         public DateTime BirthDay { get; set; }
+        public AttachmentDTO AvatarAttachment { get; set; }
+        public AttachmentDTO CustomPhotoAttachment { get; set; }
+
 
     }
 }

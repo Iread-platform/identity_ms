@@ -22,6 +22,8 @@ namespace iread_identity_ms.Web.Dto.UserDto
         public string Email { get; set; }
 
         public Nullable<int> AvatarId { get; set; }
+        public Nullable<int> CustomPhotoId { get; set; }
+
 
 
     }
