@@ -135,7 +135,11 @@ namespace M3allem.M3allem.Controller
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<UserDto>(user));
+            UserDto res = _mapper.Map<UserDto>(user);
+            res.AvatarAttachment = user.Avatar != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}") : null;
+            res.CustomPhotoAttachment = user.CustomPhoto != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.CustomPhoto}") : null;
+
+            return Ok(res);
         }
 
         [HttpGet]
@@ -331,7 +335,7 @@ namespace M3allem.M3allem.Controller
             if (user.Avatar != null)
             {
 
-                AttachmentDTO attachmentDto = _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.Avatar}").Result;
+                AttachmentDTO attachmentDto = _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}").Result;
 
                 if (attachmentDto == null || attachmentDto.Id < 1)
                 {
@@ -341,7 +345,26 @@ namespace M3allem.M3allem.Controller
                 {
                     if (!ImgExtensions.All.Contains(attachmentDto.Extension.ToLower()))
                     {
-                        ModelState.AddModelError("Audio", "Avatar not have valid extension, should be one of [" + string.Join(",", ImgExtensions.All) + "]");
+                        ModelState.AddModelError("Avatar", "Avatar not have valid extension, should be one of [" + string.Join(",", ImgExtensions.All) + "]");
+                    }
+                }
+
+            }
+
+            if (user.CustomPhoto != null)
+            {
+
+                AttachmentDTO attachmentDto = _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.CustomPhoto}").Result;
+
+                if (attachmentDto == null || attachmentDto.Id < 1)
+                {
+                    ModelState.AddModelError("CustomPhoto", "CustomPhoto not found");
+                }
+                else
+                {
+                    if (!ImgExtensions.All.Contains(attachmentDto.Extension.ToLower()))
+                    {
+                        ModelState.AddModelError("CustomPhoto", "CustomPhoto not have valid extension, should be one of [" + string.Join(",", ImgExtensions.All) + "]");
                     }
                 }
 
