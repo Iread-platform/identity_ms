@@ -28,9 +28,8 @@ namespace iread_identity_ms.DataAccess.Data.Entity
 
         [Required(AllowEmptyStrings = false)]
         public string LastName { get; set; }
-
-        [Required]
-        public int Level { get; set; }
-        public DateTime BirthDay { get; set; }
+        
+        public int? Level { get; set; }
+        public DateTime? BirthDay { get; set; }
     }
 }
