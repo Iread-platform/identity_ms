@@ -203,9 +203,9 @@ namespace M3allem.M3allem.Controller
             return response;
         }*/
 
-        [Authorize(Policy = Policies.SchoolManager)]
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         [HttpPost("RegisterAsStudent")]
-        public IActionResult RegisterStudent([FromBody] RegisterAsStudentDto student)
+        public async Task<IActionResult> RegisterStudent([FromBody] RegisterAsStudentDto student)
         {
 
             if (student == null)
@@ -229,6 +229,23 @@ namespace M3allem.M3allem.Controller
 
             _usersService.CreateStudent(studentEntity);
 
+            //Add student to school members
+            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
+            IActionResult res = null;
+            // IActionResult res = null;
+            StudentDto studentDto = new StudentDto()
+            {
+                MemberId = studentEntity.Id
+            };
+            try
+            {
+                res = await _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/student/add", studentDto);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
 
             return CreatedAtAction("GetById", new { id = studentEntity.Id }, _mapper.Map<UserDto>(studentEntity));
 
@@ -262,9 +279,10 @@ namespace M3allem.M3allem.Controller
 
 
             _usersService.CreateTeacher(teacherEntity);
-            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId")
-                .Select(c => c.Value).SingleOrDefault());
-            // int schoolId = int.Parse(User.FindFirst("SchoolId")?.Value);
+            
+            //Add teacher to school members
+            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
+           
             IActionResult res = null;
             TeacherDto teacherDto = new TeacherDto()
             {
