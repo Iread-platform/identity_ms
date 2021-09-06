@@ -25,9 +25,8 @@ namespace iread_identity_ms.Web.Dto.UserDto
         public Nullable<int> AvatarId { get; set; }
         public Nullable<int> CustomPhotoId { get; set; }
 
-
-        [NotDefaultValue(ErrorMessage = "{0} field is required.")]
-        public DateTime BirthDay { get; set; }
+        
+        public DateTime? BirthDay { get; set; }
 
     }
 }

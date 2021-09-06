@@ -75,6 +75,8 @@ namespace iread_identity_ms.DataAccess.Data{
                     Guid guid = Guid.NewGuid();
                     applicationUser.Id = guid.ToString();
                     applicationUser.UserName = "test";
+                    applicationUser.FirstName = "test";
+                    applicationUser.LastName = "test";
                     applicationUser.Name = "scott";
                     applicationUser.Role = "Teacher";
                     applicationUser.Password = "password";
