@@ -51,11 +51,11 @@ namespace iread_identity_ms.DataAccess.Repo
             user.Id = guid.ToString();
             user.Name = user.Email;
             user.NormalizedUserName = user.Email;
-            _context.ApplicationUsers.Add(user);
-            var hashedPassword = _passwordHasher.HashPassword(user, user.Password);
+            var hashedPassword = _passwordHasher.HashPassword(user, user.PasswordHash);
             user.SecurityStamp = Guid.NewGuid().ToString();
             user.PasswordHash = hashedPassword;
             user.UserName = user.Name;
+            _context.ApplicationUsers.Add(user);
             _context.SaveChanges();
 
         }

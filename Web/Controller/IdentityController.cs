@@ -274,7 +274,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-
+            teacherEntity.PasswordHash = teacher.Password;
             _usersService.CreateTeacher(teacherEntity);
             
             //Add teacher to school members
