@@ -205,7 +205,7 @@ namespace M3allem.M3allem.Controller
 
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         [HttpPost("RegisterAsStudent")]
-        public async Task<IActionResult> RegisterStudent([FromBody] RegisterAsStudentDto student)
+        public IActionResult RegisterStudent([FromBody] RegisterAsStudentDto student)
         {
 
             if (student == null)
@@ -232,14 +232,14 @@ namespace M3allem.M3allem.Controller
             //Add student to school members
             int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
             IActionResult res = null;
-            // IActionResult res = null;
+          
             StudentDto studentDto = new StudentDto()
             {
                 MemberId = studentEntity.Id
             };
             try
             {
-                res = await _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/student/add", studentDto);
+                res = _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/student/add", studentDto).Result;
             }
             catch (Exception e)
             {
@@ -251,12 +251,10 @@ namespace M3allem.M3allem.Controller
 
         }
 
-
-        // [Authorize(Policy = Policies.SchoolManager)]
-       
+        
         [HttpPost("RegisterAsTeacher")]
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
+        public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
         {
 
             if (teacher == null)
@@ -290,7 +288,7 @@ namespace M3allem.M3allem.Controller
             };
             try
             {
-                res = await _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/teacher/add", teacherDto);
+                res = _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/teacher/add", teacherDto).Result;
             }
             catch (Exception e)
             {
