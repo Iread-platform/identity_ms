@@ -19,6 +19,7 @@ using iread_identity_ms.DataAccess.Data.Type;
 using iread_interaction_ms.Web.DTO.AttachmentDTO;
 using IdentityModel.Client;
 using System.Threading;
+using iread_identity_ms.Web.Dto.SchoolMemberDto;
 
 namespace M3allem.M3allem.Controller
 {
@@ -28,7 +29,7 @@ namespace M3allem.M3allem.Controller
     {
         private readonly AppUsersService _usersService;
         private readonly IMapper _mapper;
-
+        private readonly string _schoolMs = "school_ms";
         private readonly IConsulHttpClientService _consulHttpClient;
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -202,6 +203,7 @@ namespace M3allem.M3allem.Controller
             return response;
         }*/
 
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         [HttpPost("RegisterAsStudent")]
         public IActionResult RegisterStudent([FromBody] RegisterAsStudentDto student)
         {
@@ -227,13 +229,31 @@ namespace M3allem.M3allem.Controller
 
             _usersService.CreateStudent(studentEntity);
 
+            //Add student to school members
+            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
+            IActionResult res = null;
+          
+            StudentDto studentDto = new StudentDto()
+            {
+                MemberId = studentEntity.Id
+            };
+            try
+            {
+                res = _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/student/add", studentDto).Result;
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
 
             return CreatedAtAction("GetById", new { id = studentEntity.Id }, _mapper.Map<UserDto>(studentEntity));
 
         }
 
-
+        
         [HttpPost("RegisterAsTeacher")]
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
         {
 
@@ -257,6 +277,25 @@ namespace M3allem.M3allem.Controller
 
 
             _usersService.CreateTeacher(teacherEntity);
+            
+            //Add teacher to school members
+            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
+           
+            IActionResult res = null;
+            TeacherDto teacherDto = new TeacherDto()
+            {
+                MemberId = teacherEntity.Id
+            };
+            try
+            {
+                res = _consulHttpClient.PostBodyAsync<IActionResult>(_schoolMs, $"api/School/{schoolId}/teacher/add", teacherDto).Result;
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            
 
             return CreatedAtAction("GetById", new { id = teacherEntity.Id }, _mapper.Map<UserDto>(teacherEntity));
         }
@@ -284,6 +323,7 @@ namespace M3allem.M3allem.Controller
             }
 
             _usersService.CreateSchoolManager(schoolManagerEntity);
+            
 
             return CreatedAtAction("GetById", new { id = schoolManagerEntity.Id }, _mapper.Map<UserDto>(schoolManagerEntity));
         }
