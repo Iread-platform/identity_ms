@@ -79,5 +79,19 @@ namespace iread_identity_ms.Web.Service
         {
             return await _repository.GetAppUsersRepository.GetByRole(role);
         }
+
+        public bool ResetPassword(ApplicationUser user, string newPassword)
+        {
+            try
+            {
+                _repository.GetAppUsersRepository.ResetPassword(user, newPassword);
+                return true;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
+            
+        }
     }
 }
