@@ -331,7 +331,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest();
             }
 
-            return NoContent();
+            return Ok(resetPasswordDto);
         }
         
         [HttpPost("RegisterAsSchoolManager")]
