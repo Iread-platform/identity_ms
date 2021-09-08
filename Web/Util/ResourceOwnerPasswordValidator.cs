@@ -6,15 +6,18 @@ using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data.Entity;
+using Microsoft.AspNetCore.Identity;
 
 namespace iread_identity_ms.Web.Util{
     public class ResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
     private readonly IPublicRepository _userRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public ResourceOwnerPasswordValidator(IPublicRepository userRepository)
+    public ResourceOwnerPasswordValidator(IPublicRepository userRepository, UserManager<ApplicationUser> userManager)
     {
         _userRepository = userRepository; //DI
+        _userManager = userManager;
     }
 
     //this is used to validate your user account with provided grant at /connect/token
@@ -27,15 +30,26 @@ namespace iread_identity_ms.Web.Util{
             if (user != null)
             {
                 //check if password match - remember to hash password if stored as hash in db
-                if (user.Password == context.Password) {
+                PasswordVerificationResult passwordMatch = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, context.Password);
+                if (passwordMatch == PasswordVerificationResult.Success)
+                {
                     //set the result
                     context.Result = new GrantValidationResult(
                         subject: user.Id.ToString(),
                         authenticationMethod: "custom", 
                         claims: GetUserClaims(user));
-
+                    
                     return;
-                } 
+                }
+                // if (user.PasswordHash == context.Password) {
+                //     //set the result
+                //     context.Result = new GrantValidationResult(
+                //         subject: user.Id.ToString(),
+                //         authenticationMethod: "custom", 
+                //         claims: GetUserClaims(user));
+                //
+                //     return;
+                // } 
 
                 context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant, "Incorrect password");
                 return;

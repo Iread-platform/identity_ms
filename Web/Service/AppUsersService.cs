@@ -79,5 +79,10 @@ namespace iread_identity_ms.Web.Service
         {
             return await _repository.GetAppUsersRepository.GetByRole(role);
         }
+
+        public void ResetPassword(ApplicationUser user, string newPassword)
+        {
+            _repository.GetAppUsersRepository.ResetPassword(user, newPassword);
+        }
     }
 }

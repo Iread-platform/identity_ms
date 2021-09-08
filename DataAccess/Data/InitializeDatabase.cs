@@ -79,7 +79,7 @@ namespace iread_identity_ms.DataAccess.Data{
                     applicationUser.LastName = "test";
                     applicationUser.Name = "scott";
                     applicationUser.Role = "Teacher";
-                    applicationUser.Password = "password";
+                    // applicationUser.Password = "password";
                     applicationUser.Email = "scott@gmail.com";
                     applicationUser.NormalizedUserName = "scott@gmail.com";
                     applicationDbContext.ApplicationUsers.Add(applicationUser);

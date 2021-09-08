@@ -51,11 +51,11 @@ namespace iread_identity_ms.DataAccess.Repo
             user.Id = guid.ToString();
             user.Name = user.Email;
             user.NormalizedUserName = user.Email;
-            _context.ApplicationUsers.Add(user);
-            var hasedPassword = _passwordHasher.HashPassword(user, user.Password);
+            var hashedPassword = _passwordHasher.HashPassword(user, user.PasswordHash);
             user.SecurityStamp = Guid.NewGuid().ToString();
-            user.PasswordHash = hasedPassword;
+            user.PasswordHash = hashedPassword;
             user.UserName = user.Name;
+            _context.ApplicationUsers.Add(user);
             _context.SaveChanges();
 
         }
@@ -75,6 +75,15 @@ namespace iread_identity_ms.DataAccess.Repo
         public async Task<List<ApplicationUser>> GetByRole(string role)
         {
             return await _context.ApplicationUsers.Where(u => u.Role == role).ToListAsync();
+        }
+
+        public void ResetPassword(ApplicationUser user, string newPassword)
+        {
+            var hashedPassword = _passwordHasher.HashPassword(user, newPassword);
+            user.SecurityStamp = Guid.NewGuid().ToString();
+            user.PasswordHash = hashedPassword;
+            _context.ApplicationUsers.Update(user);
+            _context.SaveChanges();
         }
     }
 }

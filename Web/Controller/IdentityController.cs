@@ -28,23 +28,24 @@ namespace M3allem.M3allem.Controller
     public class IdentityController : ControllerBase
     {
         private readonly AppUsersService _usersService;
+        private readonly MailService _mailService;
         private readonly IMapper _mapper;
         private readonly string _schoolMs = "school_ms";
         private readonly IConsulHttpClientService _consulHttpClient;
         private readonly UserManager<ApplicationUser> _userManager;
-
 
         public IdentityController(
             IPublicRepository repository,
             AppUsersService usersService,
              IMapper mapper,
              UserManager<ApplicationUser> userManager,
-             IConsulHttpClientService consulHttpClient)
+             IConsulHttpClientService consulHttpClient, MailService mailService)
         {
             _usersService = usersService;
             _mapper = mapper;
             _userManager = userManager;
             _consulHttpClient = consulHttpClient;
+            _mailService = mailService;
         }
 
         [HttpGet("all")]
@@ -226,7 +227,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-
+            studentEntity.PasswordHash = student.Password;
             _usersService.CreateStudent(studentEntity);
 
             //Add student to school members
@@ -275,7 +276,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-
+            teacherEntity.PasswordHash = teacher.Password;
             _usersService.CreateTeacher(teacherEntity);
             
             //Add teacher to school members
@@ -300,6 +301,42 @@ namespace M3allem.M3allem.Controller
             return CreatedAtAction("GetById", new { id = teacherEntity.Id }, _mapper.Map<UserDto>(teacherEntity));
         }
 
+        [HttpPut("ResetPasswordForTeacher/{id}")]
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        public IActionResult ResetPasswordForTeacher([FromBody] ResetPasswordDto resetPasswordDto, [FromRoute] string id)
+        {
+
+            if (resetPasswordDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            ApplicationUser user =  _usersService.GetById(id).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.Role != Policies.Teacher)
+            {
+                ModelState.AddModelError("Role", "This account is not a teacher account");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            _usersService.ResetPassword(user, resetPasswordDto.NewPassword);
+                
+            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : "+ resetPasswordDto.NewPassword;
+            
+            _mailService.SendEmail(user.Email , "New password", body);
+
+            return Ok(resetPasswordDto);
+        }
+        
         [HttpPost("RegisterAsSchoolManager")]
         public IActionResult RegisterAsSchoolManager([FromBody] RegisterAsSchoolManager schoolManager)
         {
@@ -322,6 +359,7 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
+            schoolManagerEntity.PasswordHash = schoolManager.Password;
             _usersService.CreateSchoolManager(schoolManagerEntity);
             
 
