@@ -184,6 +184,7 @@ namespace iread_identity_ms
 
             // for service of iread identiy ms
             services.AddScoped<AppUsersService>();
+            services.AddScoped<MailService>();
             services.AddScoped<IPublicRepository, PublicRepository>();
 
 

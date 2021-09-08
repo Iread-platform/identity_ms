@@ -28,6 +28,7 @@ namespace M3allem.M3allem.Controller
     public class IdentityController : ControllerBase
     {
         private readonly AppUsersService _usersService;
+        private readonly MailService _mailService;
         private readonly IMapper _mapper;
         private readonly string _schoolMs = "school_ms";
         private readonly IConsulHttpClientService _consulHttpClient;
@@ -38,12 +39,13 @@ namespace M3allem.M3allem.Controller
             AppUsersService usersService,
              IMapper mapper,
              UserManager<ApplicationUser> userManager,
-             IConsulHttpClientService consulHttpClient)
+             IConsulHttpClientService consulHttpClient, MailService mailService)
         {
             _usersService = usersService;
             _mapper = mapper;
             _userManager = userManager;
             _consulHttpClient = consulHttpClient;
+            _mailService = mailService;
         }
 
         [HttpGet("all")]
@@ -330,6 +332,10 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest();
             }
+
+            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : "+ resetPasswordDto.NewPassword;
+            
+            _mailService.SendEmail(user.Email , "New password", body);
 
             return Ok(resetPasswordDto);
         }
