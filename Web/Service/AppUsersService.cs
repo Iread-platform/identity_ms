@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using iread_identity_ms.DataAccess;
 using iread_identity_ms.DataAccess.Data.Entity;
 using iread_identity_ms.DataAccess.Data.Type;
+using iread_identity_ms.Web.Dto.UserDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace iread_identity_ms.Web.Service
@@ -83,6 +84,18 @@ namespace iread_identity_ms.Web.Service
         public void ResetPassword(ApplicationUser user, string newPassword)
         {
             _repository.GetAppUsersRepository.ResetPassword(user, newPassword);
+        }
+
+        public void Update(ApplicationUser oldStudent, UpdateStudentDto student)
+        {
+            oldStudent.Level = student.Level;
+            oldStudent.Avatar = student.AvatarId;
+            oldStudent.FirstName = student.FirstName;
+            oldStudent.LastName = student.LastName;
+            oldStudent.Email = student.Email;
+            oldStudent.CustomPhoto = student.CustomPhotoId;
+            oldStudent.BirthDay = oldStudent.BirthDay;
+            _repository.GetAppUsersRepository.Update(oldStudent);
         }
     }
 }

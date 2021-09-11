@@ -20,5 +20,6 @@ namespace iread_identity_ms.DataAccess.Repo
         public Task<ApplicationUser> GetByName(string userName);
         public Task<List<ApplicationUser>> GetByRole(string role);
         public void ResetPassword(ApplicationUser user, string newPassword);
+        public void Update(ApplicationUser student);
     }
 }

@@ -252,7 +252,31 @@ namespace M3allem.M3allem.Controller
 
         }
 
-        
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [HttpPut("UpdateStudentInfo/{studentId}")]
+        public async Task<IActionResult> UpdateStudentInfo([FromRoute] string studentId, [FromBody] UpdateStudentDto student)
+        {
+
+            if (student == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            ApplicationUser oldStudent = await _usersService.GetById(studentId);
+            if (oldStudent == null)
+            {
+                return NotFound();
+            }
+
+            _usersService.Update(oldStudent, student);
+            return NoContent();
+        }
+
         [HttpPost("RegisterAsTeacher")]
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
