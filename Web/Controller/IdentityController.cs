@@ -254,9 +254,8 @@ namespace M3allem.M3allem.Controller
 
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         [HttpPut("UpdateStudentInfo/{studentId}")]
-        public async Task<IActionResult> UpdateStudentInfo([FromRoute] string studentId, [FromBody] UpdateStudentDto student)
+        public  IActionResult UpdateStudentInfo([FromRoute] string studentId, [FromBody] UpdateStudentDto student)
         {
-
             if (student == null)
             {
                 return BadRequest();
@@ -267,13 +266,33 @@ namespace M3allem.M3allem.Controller
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
-            ApplicationUser oldStudent = await _usersService.GetById(studentId);
+            ApplicationUser studentEntity = _mapper.Map<ApplicationUser>(student);
+            studentEntity.Id = studentId;
+            
+            ApplicationUser oldStudent =  _usersService.GetById(studentId).GetAwaiter().GetResult();
             if (oldStudent == null)
             {
                 return NotFound();
             }
 
-            _usersService.Update(oldStudent, student);
+            _usersService.Update(oldStudent, studentEntity);
+
+            IActionResult res = null;
+            UpdateStudentMemberDto studentMemberDto = new UpdateStudentMemberDto()
+            {
+                FirstName = studentEntity.FirstName,
+                LastName = studentEntity.LastName
+            };
+            try
+            {
+                res = _consulHttpClient.PutBodyAsync<IActionResult>(_schoolMs, $"api/School/UpdateStudentInfo/{studentId}", studentMemberDto).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            
             return NoContent();
         }
 

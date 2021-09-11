@@ -86,9 +86,27 @@ namespace iread_identity_ms.DataAccess.Repo
             _context.SaveChanges();
         }
 
-        public void Update(ApplicationUser student)
+        public void Update(ApplicationUser newUser, ApplicationUser oldUser)
         {
-            _context.ApplicationUsers.Update(student);
+            oldUser.Avatar = newUser.Avatar;
+            oldUser.Level = newUser.Level;
+            oldUser.FirstName = newUser.FirstName;
+            oldUser.LastName = newUser.LastName;
+            oldUser.BirthDay = newUser.BirthDay;
+            oldUser.CustomPhoto = newUser.CustomPhoto;
+            oldUser.Email = newUser.Email;
+            _context.ApplicationUsers.Update(oldUser);
+            // _context.Entry(oldUser).State = EntityState.Detached;
+            // _context.SaveChanges();
+            // _context.ApplicationUsers.Attach(newUser);
+            // _context.Entry(newUser).State = EntityState.Modified;
+            // _context.Entry(newUser).Property(u => u.Avatar).IsModified = true;
+            // _context.Entry(newUser).Property(u => u.BirthDay).IsModified = true;
+            // _context.Entry(newUser).Property(u => u.FirstName).IsModified = true;
+            // _context.Entry(newUser).Property(u => u.LastName).IsModified = true;
+            // _context.Entry(newUser).Property(u => u.CustomPhoto).IsModified = true;
+            // _context.Entry(newUser).Property(u => u.Email).IsModified = true;
+            // _context.Entry(newUser).Property(u => u.Level).IsModified = true;
             _context.SaveChanges();
         }
     }

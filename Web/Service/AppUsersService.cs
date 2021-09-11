@@ -86,16 +86,9 @@ namespace iread_identity_ms.Web.Service
             _repository.GetAppUsersRepository.ResetPassword(user, newPassword);
         }
 
-        public void Update(ApplicationUser oldStudent, UpdateStudentDto student)
+        public void Update(ApplicationUser oldStudent, ApplicationUser student)
         {
-            oldStudent.Level = student.Level;
-            oldStudent.Avatar = student.AvatarId;
-            oldStudent.FirstName = student.FirstName;
-            oldStudent.LastName = student.LastName;
-            oldStudent.Email = student.Email;
-            oldStudent.CustomPhoto = student.CustomPhotoId;
-            oldStudent.BirthDay = oldStudent.BirthDay;
-            _repository.GetAppUsersRepository.Update(oldStudent);
+            _repository.GetAppUsersRepository.Update(student, oldStudent);
         }
     }
 }
