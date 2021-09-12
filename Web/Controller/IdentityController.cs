@@ -23,7 +23,7 @@ using iread_identity_ms.Web.Dto.SchoolMemberDto;
 
 namespace M3allem.M3allem.Controller
 {
-    //we are rock
+    
     [Route("api/[controller]/")]
     [ApiController]
     public class IdentityController : ControllerBase
