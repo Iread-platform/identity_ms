@@ -336,7 +336,7 @@ namespace M3allem.M3allem.Controller
 
             return Ok(resetPasswordDto);
         }
-        
+
         [HttpPut("ResetPasswordForStudent/{id}")]
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         public IActionResult ResetPasswordForStudent([FromBody] ResetPasswordDto resetPasswordDto, [FromRoute] string id)
@@ -372,6 +372,43 @@ namespace M3allem.M3allem.Controller
 
             return Ok(resetPasswordDto);
         }
+
+        [HttpPut("ResetPasswordForManager/{id}")]
+        [Authorize(Roles = Policies.Administrator,AuthenticationSchemes = "Bearer")]
+        public IActionResult ResetPasswordForManager([FromBody] ResetPasswordDto resetPasswordDto, [FromRoute] string id)
+        {
+
+            if (resetPasswordDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            ApplicationUser user =  _usersService.GetById(id).Result;
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.Role != Policies.SchoolManager)
+            {
+                ModelState.AddModelError("Role", "This account is not a school manager account");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            _usersService.ResetPassword(user, resetPasswordDto.NewPassword);
+                
+            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : "+ resetPasswordDto.NewPassword;
+            
+            _mailService.SendEmail(user.Email , "New password", body);
+
+            return Ok(resetPasswordDto);
+        }
+
         
         [HttpPost("RegisterAsSchoolManager")]
         public IActionResult RegisterAsSchoolManager([FromBody] RegisterAsSchoolManager schoolManager)
