@@ -277,7 +277,7 @@ namespace M3allem.M3allem.Controller
 
             if (oldStudent.Role != Policies.Student)
             {
-                ModelState.AddModelError("Role", "This account is not a student account");
+                ModelState.AddModelError("Role", "This account is not a student account.");
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
