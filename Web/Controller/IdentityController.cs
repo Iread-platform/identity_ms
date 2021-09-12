@@ -292,7 +292,57 @@ namespace M3allem.M3allem.Controller
             };
             try
             {
-                res = _consulHttpClient.PutBodyAsync<IActionResult>(_schoolMs, $"api/School/UpdateStudentInfo/{studentId}", studentMemberDto).GetAwaiter().GetResult();
+                res = _consulHttpClient.PutBodyAsync<IActionResult>(_schoolMs, $"api/School/UpdateMemberInfo/{studentId}", studentMemberDto).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            
+            return NoContent();
+        }
+        
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [HttpPut("UpdateTeacherInfo/{teacherId}")]
+        public  IActionResult UpdateTeacherInfo([FromRoute] string teacherId, [FromBody] UpdateTeacherDto teacher)
+        {
+            if (teacher == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            ApplicationUser teacherEntity = _mapper.Map<ApplicationUser>(teacher);
+            teacherEntity.Id = teacherId;
+            
+            ApplicationUser oldTeacher =  _usersService.GetById(teacherId).GetAwaiter().GetResult();
+            if (oldTeacher == null)
+            {
+                return NotFound();
+            }
+
+            if (oldTeacher.Role != Policies.Teacher)
+            {
+                ModelState.AddModelError("Role", "This account is not a student account.");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            _usersService.Update(oldTeacher, teacherEntity);
+
+            IActionResult res = null;
+            UpdateTeacherDto teacherMemberDto = new UpdateTeacherDto()
+            {
+                FirstName = teacherEntity.FirstName,
+                LastName = teacherEntity.LastName
+            };
+            try
+            {
+                res = _consulHttpClient.PutBodyAsync<IActionResult>(_schoolMs, $"api/School/UpdateMemberInfo/{teacherId}", teacherMemberDto).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {

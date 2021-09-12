@@ -86,9 +86,9 @@ namespace iread_identity_ms.Web.Service
             _repository.GetAppUsersRepository.ResetPassword(user, newPassword);
         }
 
-        public void Update(ApplicationUser oldStudent, ApplicationUser student)
+        public void Update(ApplicationUser oldUser, ApplicationUser user)
         {
-            _repository.GetAppUsersRepository.Update(student, oldStudent);
+            _repository.GetAppUsersRepository.Update(user, oldUser);
         }
     }
 }
