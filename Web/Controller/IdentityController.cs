@@ -28,7 +28,6 @@ namespace M3allem.M3allem.Controller
     [ApiController]
     public class IdentityController : ControllerBase
     {
-        //test
         private readonly AppUsersService _usersService;
         private readonly MailService _mailService;
         private readonly IMapper _mapper;
