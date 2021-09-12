@@ -23,6 +23,7 @@ using iread_identity_ms.Web.Dto.SchoolMemberDto;
 
 namespace M3allem.M3allem.Controller
 {
+    
     [Route("api/[controller]/")]
     [ApiController]
     public class IdentityController : ControllerBase
@@ -252,7 +253,56 @@ namespace M3allem.M3allem.Controller
 
         }
 
-        
+        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [HttpPut("UpdateStudentInfo/{studentId}")]
+        public  IActionResult UpdateStudentInfo([FromRoute] string studentId, [FromBody] UpdateStudentDto student)
+        {
+            if (student == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            ApplicationUser studentEntity = _mapper.Map<ApplicationUser>(student);
+            studentEntity.Id = studentId;
+            
+            ApplicationUser oldStudent =  _usersService.GetById(studentId).GetAwaiter().GetResult();
+            if (oldStudent == null)
+            {
+                return NotFound();
+            }
+
+            if (oldStudent.Role != Policies.Student)
+            {
+                ModelState.AddModelError("Role", "This account is not a student account.");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            _usersService.Update(oldStudent, studentEntity);
+
+            IActionResult res = null;
+            UpdateStudentMemberDto studentMemberDto = new UpdateStudentMemberDto()
+            {
+                FirstName = studentEntity.FirstName,
+                LastName = studentEntity.LastName
+            };
+            try
+            {
+                res = _consulHttpClient.PutBodyAsync<IActionResult>(_schoolMs, $"api/School/UpdateStudentInfo/{studentId}", studentMemberDto).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            
+            return NoContent();
+        }
+
         [HttpPost("RegisterAsTeacher")]
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)

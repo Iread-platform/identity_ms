@@ -85,5 +85,18 @@ namespace iread_identity_ms.DataAccess.Repo
             _context.ApplicationUsers.Update(user);
             _context.SaveChanges();
         }
+
+        public void Update(ApplicationUser newUser, ApplicationUser oldUser)
+        {
+            oldUser.Avatar = newUser.Avatar;
+            oldUser.Level = newUser.Level;
+            oldUser.FirstName = newUser.FirstName;
+            oldUser.LastName = newUser.LastName;
+            oldUser.BirthDay = newUser.BirthDay;
+            oldUser.CustomPhoto = newUser.CustomPhoto;
+            oldUser.Email = newUser.Email;
+            _context.ApplicationUsers.Update(oldUser);
+            _context.SaveChanges();
+        }
     }
 }
