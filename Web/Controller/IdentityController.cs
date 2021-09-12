@@ -281,6 +281,15 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("Role", "This account is not a student account.");
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
+            
+            if (oldStudent.Email != student.Email)
+            {
+                UserFieldValidationAsync(studentEntity);
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
 
             _usersService.Update(oldStudent, studentEntity);
 
@@ -331,6 +340,15 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("Role", "This account is not a teacher account.");
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
+            
+            if (oldTeacher.Email != teacher.Email)
+            {
+                UserFieldValidationAsync(teacherEntity);
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
 
             _usersService.Update(oldTeacher, teacherEntity);
 
@@ -379,6 +397,15 @@ namespace M3allem.M3allem.Controller
             if (oldManager.Role != Policies.SchoolManager)
             {
                 ModelState.AddModelError("Role", "This account is not a manager account.");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            if (oldManager.Email != manager.Email)
+            {
+                UserFieldValidationAsync(managerEntity);
+            }
+            if (!ModelState.IsValid)
+            {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
@@ -614,10 +641,10 @@ namespace M3allem.M3allem.Controller
         }
 
 
-        private async Task UserFieldValidationAsync(ApplicationUser user)
+        private void UserFieldValidationAsync(ApplicationUser user)
         {
 
-            var similarUser = await _usersService.GetByEmail(user.Email);
+            var similarUser =  _usersService.GetByEmail(user.Email).GetAwaiter().GetResult();
             if (similarUser != null)
             {
                 ModelState.AddModelError("email", "Email already exist");
