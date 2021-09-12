@@ -275,6 +275,12 @@ namespace M3allem.M3allem.Controller
                 return NotFound();
             }
 
+            if (oldStudent.Role != Policies.Student)
+            {
+                ModelState.AddModelError("Role", "This account is not a student account");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
             _usersService.Update(oldStudent, studentEntity);
 
             IActionResult res = null;
