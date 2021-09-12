@@ -95,9 +95,6 @@ namespace iread_identity_ms.DataAccess.Repo
             oldUser.BirthDay = newUser.BirthDay;
             oldUser.CustomPhoto = newUser.CustomPhoto;
             oldUser.Email = newUser.Email;
-            oldUser.NormalizedUserName = newUser.Email;
-            oldUser.UserName = newUser.Email;
-            oldUser.Name = newUser.Email;
             _context.ApplicationUsers.Update(oldUser);
             _context.SaveChanges();
         }
