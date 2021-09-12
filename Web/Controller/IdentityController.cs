@@ -328,14 +328,14 @@ namespace M3allem.M3allem.Controller
 
             if (oldTeacher.Role != Policies.Teacher)
             {
-                ModelState.AddModelError("Role", "This account is not a student account.");
+                ModelState.AddModelError("Role", "This account is not a teacher account.");
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
 
             _usersService.Update(oldTeacher, teacherEntity);
 
             IActionResult res = null;
-            UpdateTeacherDto teacherMemberDto = new UpdateTeacherDto()
+            UpdateTeacherMemberDto teacherMemberDto = new UpdateTeacherMemberDto()
             {
                 FirstName = teacherEntity.FirstName,
                 LastName = teacherEntity.LastName
@@ -353,6 +353,56 @@ namespace M3allem.M3allem.Controller
             return NoContent();
         }
 
+        [Authorize(Roles = Policies.Administrator,AuthenticationSchemes = "Bearer")]
+        [HttpPut("UpdateManagerInfo/{managerId}")]
+        public  IActionResult UpdateManagerInfo([FromRoute] string managerId, [FromBody] UpdateManagerDto manager)
+        {
+            if (manager == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            ApplicationUser managerEntity = _mapper.Map<ApplicationUser>(manager);
+            managerEntity.Id = managerId;
+            
+            ApplicationUser oldManager =  _usersService.GetById(managerId).GetAwaiter().GetResult();
+            if (oldManager == null)
+            {
+                return NotFound();
+            }
+
+            if (oldManager.Role != Policies.SchoolManager)
+            {
+                ModelState.AddModelError("Role", "This account is not a manager account.");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            _usersService.Update(oldManager, managerEntity);
+
+            IActionResult res = null;
+            UpdateManagerMemberDto teacherMemberDto = new UpdateManagerMemberDto()
+            {
+                FirstName = managerEntity.FirstName,
+                LastName = managerEntity.LastName
+            };
+            try
+            {
+                res = _consulHttpClient.PutBodyAsync<IActionResult>(_schoolMs, $"api/School/UpdateMemberInfo/{managerId}", teacherMemberDto).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("School", e.Message);
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+            
+            return NoContent();
+        }
+        
         [HttpPost("RegisterAsTeacher")]
         [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
         public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
