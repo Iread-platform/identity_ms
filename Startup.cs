@@ -268,7 +268,7 @@ namespace iread_identity_ms
             //app.UseHttpsRedirection();
 
             // this order is required for JWT auth
-            app.UseAuthentication();
+            //app.UseAuthentication();
 
             app.UseRouting();
             app.UseCors("_myAllowSpecificOrigins");
