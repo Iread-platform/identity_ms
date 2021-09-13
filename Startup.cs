@@ -219,7 +219,11 @@ namespace iread_identity_ms
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             string migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-            services.AddIdentityServer()
+            services.AddIdentityServer(options =>
+                {
+                    options.IssuerUri = "http://217.182.250.236:5015";
+                    //options.IssuerUri = "http://localhost:5015";
+                })
                 .AddConfigurationStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
