@@ -265,13 +265,12 @@ namespace iread_identity_ms
 
             // this order is required for JWT auth
             //app.UseAuthentication();
-
+            
+            app.UseIdentityServer();
+            
             app.UseRouting();
             app.UseCors("_myAllowSpecificOrigins");
             app.UseAuthorization();
-
-
-            //app.UseIdentityServer();
 
             app.UseEndpoints(endpoints =>
             {
