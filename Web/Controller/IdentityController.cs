@@ -19,6 +19,7 @@ using iread_identity_ms.DataAccess.Data.Type;
 using iread_interaction_ms.Web.DTO.AttachmentDTO;
 using IdentityModel.Client;
 using System.Threading;
+using IdentityServer4.AccessTokenValidation;
 using iread_identity_ms.Web.Dto.SchoolMemberDto;
 
 namespace M3allem.M3allem.Controller
@@ -147,7 +148,8 @@ namespace M3allem.M3allem.Controller
 
         [HttpGet]
         [Route("myProfile")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(AuthenticationSchemes = IdentityServerAuthenticationDefaults.AuthenticationScheme)]
         public async Task<IActionResult> MyProfileAsync()
         {
             string myId = User.Claims.Where(c => c.Type == "sub")
