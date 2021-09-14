@@ -8,6 +8,7 @@ using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using iread_identity_ms.DataAccess;
+using iread_identity_ms.DataAccess.Data.Entity;
 using iread_identity_ms.Web.Dto.SchoolMemberDto;
 using iread_identity_ms.Web.Dto.UserDto;
 using iread_identity_ms.Web.Service;
@@ -31,14 +32,18 @@ namespace iread_identity_ms.Web.Util
 
         public Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
-            //var user = await _userRepository.GetAppUsersRepository.GetById(context.Subject.ToString());
             string memberId = context.Subject.Claims.Where(c => c.Type == "sub").Select(c => c.Value).SingleOrDefault();
             InnerSchoolMemberDto schoolMember = _consulHttpClient.GetAsync<InnerSchoolMemberDto>("school_ms", $"/api/School/getByMemberId/{memberId}").Result;
-            
+            ApplicationUser user = _userRepository.GetAppUsersRepository.GetById(memberId).GetAwaiter().GetResult();
+
             IEnumerable<Claim> roleClaims = context.Subject.FindAll(JwtClaimTypes.Role);
             List<Claim> claims = new List<Claim>(roleClaims);
             claims.Add(new Claim("NameIdentifier", memberId));
-            claims.Add(new Claim("SchoolId",schoolMember.SchoolId.ToString()));
+            claims.Add(new Claim("SchoolId", schoolMember.SchoolId.ToString()));
+            claims.Add(new Claim("FirstName", user.FirstName));
+            claims.Add(new Claim("LastName", user.LastName));
+
+
 
             List<string> list = context.RequestedClaimTypes.ToList();
 
