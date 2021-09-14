@@ -152,7 +152,7 @@ namespace iread_identity_ms
             .AddIdentityServerAuthentication("Bearer", options =>
             {
                 options.ApiName = "api1";
-                options.Authority = url;
+                options.Authority = "http://217.182.250.236:5015";
                 options.RequireHttpsMetadata = false;
             });
 
