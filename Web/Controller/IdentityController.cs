@@ -19,6 +19,7 @@ using iread_identity_ms.DataAccess.Data.Type;
 using iread_interaction_ms.Web.DTO.AttachmentDTO;
 using IdentityModel.Client;
 using System.Threading;
+using IdentityServer4.AccessTokenValidation;
 using iread_identity_ms.Web.Dto.SchoolMemberDto;
 
 namespace M3allem.M3allem.Controller
@@ -147,13 +148,19 @@ namespace M3allem.M3allem.Controller
 
         [HttpGet]
         [Route("myProfile")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize(AuthenticationSchemes = IdentityServerAuthenticationDefaults.AuthenticationScheme)]
         public async Task<IActionResult> MyProfileAsync()
         {
             string myId = User.Claims.Where(c => c.Type == "sub")
-                             .Select(c => c.Value).SingleOrDefault();
+                .Select(c => c.Value).SingleOrDefault();
 
-            return Ok(_mapper.Map<UserDto>(await _usersService.GetById(myId)));
+            var user = await _usersService.GetById(myId);
+            UserDto res = _mapper.Map<UserDto>(user);
+            res.AvatarAttachment = user.Avatar != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}") : null;
+            res.CustomPhotoAttachment = user.CustomPhoto != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.CustomPhoto}") : null;
+
+            return Ok(res);
         }
 
         /*// POST: api/SysUsers/add
