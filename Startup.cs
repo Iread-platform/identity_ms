@@ -147,7 +147,7 @@ namespace iread_identity_ms
             services.AddSingleton(mapper);
 
             // for JWT config
-            var url = Startup.Configuration.GetSection("profiles")["iread_identity_ms:applicationUrl"];
+            var url = Startup.Configuration.GetSection("profiles")["iread_identity_ms_server:applicationUrl"];
             services.AddAuthentication("Bearer")
             .AddIdentityServerAuthentication("Bearer", options =>
             {
