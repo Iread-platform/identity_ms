@@ -148,6 +148,7 @@ namespace iread_identity_ms
 
             // for JWT config
             var url = Startup.Configuration.GetSection("URL")["applicationUrl"];
+            Console.WriteLine("url is:" + url);
             services.AddAuthentication("Bearer")
             .AddIdentityServerAuthentication("Bearer", options =>
             {
