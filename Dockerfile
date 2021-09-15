@@ -12,6 +12,8 @@ ENV ConnectionStrings:DefaultConnection="Server=mysql_identity_ms;Database=ident
 
 ENV ConsulConfig:Host="http://consul:8500"
 
+ENV URL:applicationUrl="http://217.182.250.236:5015"
+
 EXPOSE 5015
 
 COPY ./publish .
