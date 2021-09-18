@@ -234,12 +234,20 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
+            
+            //get manager school id
+            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
+           
+            if (schoolId == -1)
+            {
+                ModelState.AddModelError("school", "This manager does not have a school account.");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
 
             studentEntity.PasswordHash = student.Password;
             _usersService.CreateStudent(studentEntity);
 
             //Add student to school members
-            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
             IActionResult res = null;
           
             StudentDto studentDto = new StudentDto()
@@ -382,13 +390,21 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
+            
+            //get manager school id
+            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
+           
+            if (schoolId == -1)
+            {
+                ModelState.AddModelError("school", "This manager does not have a school account.");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
 
             teacherEntity.PasswordHash = teacher.Password;
             _usersService.CreateTeacher(teacherEntity);
             
             //Add teacher to school members
-            int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
-           
+            
             IActionResult res = null;
             TeacherDto teacherDto = new TeacherDto()
             {

@@ -33,13 +33,22 @@ namespace iread_identity_ms.Web.Util
         public Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             string memberId = context.Subject.Claims.Where(c => c.Type == "sub").Select(c => c.Value).SingleOrDefault();
-            InnerSchoolMemberDto schoolMember = _consulHttpClient.GetAsync<InnerSchoolMemberDto>("school_ms", $"/api/School/getByMemberId/{memberId}").Result;
+            InnerSchoolMemberDto schoolMember = _consulHttpClient.GetAsync<InnerSchoolMemberDto>("school_ms", $"/api/School/getByMemberId/{memberId}").GetAwaiter().GetResult();
             ApplicationUser user = _userRepository.GetAppUsersRepository.GetById(memberId).GetAwaiter().GetResult();
-
+            
             IEnumerable<Claim> roleClaims = context.Subject.FindAll(JwtClaimTypes.Role);
             List<Claim> claims = new List<Claim>(roleClaims);
+           
+            if (schoolMember == null)
+            {
+                claims.Add(new Claim("SchoolId", "-1"));
+            }
+            else
+            {
+                claims.Add(new Claim("SchoolId", schoolMember.SchoolId.ToString()));
+            }
+           
             claims.Add(new Claim("NameIdentifier", memberId));
-            claims.Add(new Claim("SchoolId", schoolMember.SchoolId.ToString()));
             claims.Add(new Claim("FirstName", user.FirstName));
             claims.Add(new Claim("LastName", user.LastName));
 
