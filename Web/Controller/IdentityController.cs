@@ -156,10 +156,10 @@ namespace M3allem.M3allem.Controller
                 .Select(c => c.Value).SingleOrDefault();
 
             var user = await _usersService.GetById(myId);
-            UserDto res = _mapper.Map<UserDto>(user);
+            UserWithSchoolDto res = _mapper.Map<UserWithSchoolDto>(user);
             res.AvatarAttachment = user.Avatar != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}") : null;
             res.CustomPhotoAttachment = user.CustomPhoto != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.CustomPhoto}") : null;
-
+            res.SchoolMember = _consulHttpClient.GetAsync<InnerSchoolMemberDto>("school_ms", $"/api/School/getByMemberId/{myId}").GetAwaiter().GetResult();
             return Ok(res);
         }
 
