@@ -21,6 +21,7 @@ using IdentityModel.Client;
 using System.Threading;
 using IdentityServer4.AccessTokenValidation;
 using iread_identity_ms.Web.Dto.SchoolMemberDto;
+using iread_identity_ms.Web.Dto.StoryDto;
 
 namespace M3allem.M3allem.Controller
 {
@@ -146,20 +147,22 @@ namespace M3allem.M3allem.Controller
             return Ok(res);
         }
 
-        [HttpGet]
-        [Route("myProfile")]
-        //[Authorize(AuthenticationSchemes = "Bearer")]
-        [Authorize(AuthenticationSchemes = IdentityServerAuthenticationDefaults.AuthenticationScheme)]
+        [HttpGet("myProfile")]
+                // [Authorize(AuthenticationSchemes = IdentityServerAuthenticationDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> MyProfileAsync()
         {
+            
             string myId = User.Claims.Where(c => c.Type == "sub")
                 .Select(c => c.Value).SingleOrDefault();
 
             var user = await _usersService.GetById(myId);
-            UserDto res = _mapper.Map<UserDto>(user);
+            UserWithSchoolAndStoriesDto res = _mapper.Map<UserWithSchoolAndStoriesDto>(user);
             res.AvatarAttachment = user.Avatar != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}") : null;
             res.CustomPhotoAttachment = user.CustomPhoto != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.CustomPhoto}") : null;
-
+            res.SchoolMember = _consulHttpClient.GetAsync<InnerSchoolMemberDto>("school_ms", $"/api/School/getByMemberId/{myId}").GetAwaiter().GetResult();
+            res.ViewStories = _consulHttpClient.GetAsync<List<ViewStoryDto>>("story_ms", $"api/Story/my-reading-stories/{myId}").GetAwaiter().GetResult();
+            
             return Ok(res);
         }
 

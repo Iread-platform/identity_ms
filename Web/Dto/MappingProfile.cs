@@ -10,6 +10,7 @@ namespace iread_identity_ms.Web.Dto
         public MappingProfile()
         {
             CreateMap<ApplicationUser, UserDto.UserDto>().ReverseMap();
+            CreateMap<ApplicationUser, UserDto.UserWithSchoolAndStoriesDto>().ReverseMap();
             CreateMap<ApplicationUser, UpdateStudentDto>().ReverseMap();
             CreateMap<ApplicationUser, RegisterAsStudentDto>().ForMember(dest =>
             dest.AvatarId,

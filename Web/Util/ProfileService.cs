@@ -46,6 +46,14 @@ namespace iread_identity_ms.Web.Util
             else
             {
                 claims.Add(new Claim("SchoolId", schoolMember.SchoolId.ToString()));
+                claims.Add(new Claim("SchoolTitle", schoolMember.SchoolTitle));
+                string classIds = "";
+                foreach (var c in schoolMember.Classes)
+                {
+                    classIds += c.ClassId + ",";
+                }
+                classIds = classIds.Remove(classIds.Length - 1); //for remove last comma from classIds 
+                claims.Add(new Claim("ClassIds", classIds));
             }
            
             claims.Add(new Claim("NameIdentifier", memberId));

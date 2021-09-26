@@ -153,6 +153,7 @@ namespace iread_identity_ms
             {
                 options.ApiName = "api1";
                 options.Authority = url;
+                options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
             });
 
@@ -219,11 +220,7 @@ namespace iread_identity_ms
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             string migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-            services.AddIdentityServer(options =>
-                {
-                    options.IssuerUri = "http://217.182.250.236:5015";
-                    //options.IssuerUri = "http://localhost:5015";
-                })
+            services.AddIdentityServer()
                 .AddConfigurationStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
@@ -236,11 +233,11 @@ namespace iread_identity_ms
                         builder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"),
                         sql => sql.MigrationsAssembly(migrationsAssembly));
                     // this enables automatic token cleanup. this is optional.
-                    options.EnableTokenCleanup = true;
+                    options.EnableTokenCleanup = false;
                     options.TokenCleanupInterval = 30;
+
                 }).AddDeveloperSigningCredential()
-                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
-            ;
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>();
         }
 
 

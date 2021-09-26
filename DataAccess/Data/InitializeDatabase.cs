@@ -109,6 +109,7 @@ namespace iread_identity_ms.DataAccess.Data{
                     ClientSecrets = new List<Secret> {new Secret("!re@d".Sha256())},
                     AllowedScopes = new List<string> {"roles",Policies.Administrator,Policies.Student,Policies.Teacher},
                     AllowOfflineAccess = true,
+                    
                     AccessTokenLifetime = 3600 * 24 * 5, // 5 days
                     IdentityTokenLifetime = 3600 * 24 * 5 // 5 days
                 }
