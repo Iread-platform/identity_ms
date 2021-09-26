@@ -52,7 +52,7 @@ namespace iread_identity_ms.Web.Util
                 {
                     classIds += c.ClassId + ",";
                 }
-                classIds = classIds.Remove(classIds.Length - 1);
+                classIds = classIds.Remove(classIds.Length - 1); //for remove last comma from classIds 
                 claims.Add(new Claim("ClassIds", classIds));
             }
            
