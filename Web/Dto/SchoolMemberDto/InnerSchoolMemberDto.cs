@@ -7,6 +7,7 @@ namespace iread_identity_ms.Web.Dto.SchoolMemberDto
     {
         public int SchoolId { get; set; }
         public string SchoolTitle { get; set; }
+        public string SchoolMembershipType { get; set; }
         public IEnumerable<InnerClassDto> Classes { get; set; }
     }
 }
