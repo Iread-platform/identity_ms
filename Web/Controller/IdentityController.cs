@@ -25,7 +25,7 @@ using iread_identity_ms.Web.Dto.StoryDto;
 
 namespace M3allem.M3allem.Controller
 {
-    
+
     [Route("api/[controller]/")]
     [ApiController]
     public class IdentityController : ControllerBase
@@ -148,11 +148,11 @@ namespace M3allem.M3allem.Controller
         }
 
         [HttpGet("myProfile")]
-                // [Authorize(AuthenticationSchemes = IdentityServerAuthenticationDefaults.AuthenticationScheme)]
+        // [Authorize(AuthenticationSchemes = IdentityServerAuthenticationDefaults.AuthenticationScheme)]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> MyProfileAsync()
         {
-            
+
             string myId = User.Claims.Where(c => c.Type == "sub")
                 .Select(c => c.Value).SingleOrDefault();
 
@@ -162,7 +162,7 @@ namespace M3allem.M3allem.Controller
             res.CustomPhotoAttachment = user.CustomPhoto != null ? await _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Attachment/get/{user.CustomPhoto}") : null;
             res.SchoolMember = _consulHttpClient.GetAsync<InnerSchoolMemberDto>("school_ms", $"/api/School/getByMemberId/{myId}").GetAwaiter().GetResult();
             res.ViewStories = _consulHttpClient.GetAsync<List<ViewStoryDto>>("story_ms", $"api/Story/my-reading-stories/{myId}").GetAwaiter().GetResult();
-            
+
             return Ok(res);
         }
 
@@ -215,7 +215,7 @@ namespace M3allem.M3allem.Controller
             return response;
         }*/
 
-        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Policies.SchoolManager, AuthenticationSchemes = "Bearer")]
         [HttpPost("RegisterAsStudent")]
         public IActionResult RegisterStudent([FromBody] RegisterAsStudentDto student)
         {
@@ -237,10 +237,10 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            
+
             //get manager school id
             int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
-           
+
             if (schoolId == -1)
             {
                 ModelState.AddModelError("school", "This manager does not have a school account.");
@@ -252,7 +252,7 @@ namespace M3allem.M3allem.Controller
 
             //Add student to school members
             IActionResult res = null;
-          
+
             StudentDto studentDto = new StudentDto()
             {
                 MemberId = studentEntity.Id
@@ -271,9 +271,9 @@ namespace M3allem.M3allem.Controller
 
         }
 
-        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Policies.SchoolManager, AuthenticationSchemes = "Bearer")]
         [HttpPut("UpdateStudentInfo/{studentId}")]
-        public  IActionResult UpdateStudentInfo([FromRoute] string studentId, [FromBody] UpdateStudentDto student)
+        public IActionResult UpdateStudentInfo([FromRoute] string studentId, [FromBody] UpdateStudentDto student)
         {
             if (student == null)
             {
@@ -287,8 +287,8 @@ namespace M3allem.M3allem.Controller
 
             ApplicationUser studentEntity = _mapper.Map<ApplicationUser>(student);
             studentEntity.Id = studentId;
-            
-            ApplicationUser oldStudent =  _usersService.GetById(studentId).GetAwaiter().GetResult();
+
+            ApplicationUser oldStudent = _usersService.GetById(studentId).GetAwaiter().GetResult();
             if (oldStudent == null)
             {
                 return NotFound();
@@ -317,13 +317,70 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("School", e.Message);
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            
+
             return NoContent();
         }
-        
-        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+
+
+
+        [Authorize(Roles = Policies.Student, AuthenticationSchemes = "Bearer")]
+        [HttpPut("update-my-image")]
+        public IActionResult UpdateMyImage([FromForm] int attachmentId, [FromForm] bool isAvatar)
+        {
+            if (attachmentId < 1)
+            {
+                ModelState.AddModelError("attachmentId", "Attachment id is not valid");
+                return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+            }
+
+            string myId = User.Claims.Where(c => c.Type == "sub")
+             .Select(c => c.Value).SingleOrDefault();
+
+            ApplicationUser user = _usersService.GetById(myId).GetAwaiter().GetResult();
+
+            if (!isAvatar)
+            {
+
+                AttachmentDTO attachmentDto = _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}").Result;
+                if (attachmentDto == null || attachmentDto.Id < 1)
+                {
+                    ModelState.AddModelError("attachment", "attachment not found");
+                    return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+                }
+
+                if (!ImgExtensions.All.Contains(attachmentDto.Extension.ToLower()))
+                {
+                    ModelState.AddModelError("attachment", "attachment not have valid extension, should be one of [" + string.Join(",", ImgExtensions.All) + "]");
+                    return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+                }
+
+                user.Avatar = null;
+                user.CustomPhoto = attachmentId;
+            }
+            else
+            {
+                // if the user want to change avatar
+                // check first if the attachment is avatar
+                user.Avatar = attachmentId;
+                user.CustomPhoto = null;
+                AttachmentDTO attachmentDto = _consulHttpClient.GetAsync<AttachmentDTO>("attachment_ms", $"/api/Avatar/get/{user.Avatar}").GetAwaiter().GetResult();
+
+                if (attachmentDto == null || attachmentDto.Id < 1)
+                {
+                    ModelState.AddModelError("Avatar", "Avatar not found");
+                    return BadRequest(Startup.GetErrorsFromModelState(ModelState));
+                }
+
+            }
+
+            _usersService.Update(user);
+            return NoContent();
+        }
+
+
+        [Authorize(Roles = Policies.SchoolManager, AuthenticationSchemes = "Bearer")]
         [HttpPut("UpdateTeacherInfo/{teacherId}")]
-        public  IActionResult UpdateTeacherInfo([FromRoute] string teacherId, [FromBody] UpdateTeacherDto teacher)
+        public IActionResult UpdateTeacherInfo([FromRoute] string teacherId, [FromBody] UpdateTeacherDto teacher)
         {
             if (teacher == null)
             {
@@ -337,8 +394,8 @@ namespace M3allem.M3allem.Controller
 
             ApplicationUser teacherEntity = _mapper.Map<ApplicationUser>(teacher);
             teacherEntity.Id = teacherId;
-            
-            ApplicationUser oldTeacher =  _usersService.GetById(teacherId).GetAwaiter().GetResult();
+
+            ApplicationUser oldTeacher = _usersService.GetById(teacherId).GetAwaiter().GetResult();
             if (oldTeacher == null)
             {
                 return NotFound();
@@ -367,12 +424,12 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("School", e.Message);
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            
+
             return NoContent();
         }
 
         [HttpPost("RegisterAsTeacher")]
-        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Policies.SchoolManager, AuthenticationSchemes = "Bearer")]
         public IActionResult RegisterAsTeacher([FromBody] RegisterAsTeachertDto teacher)
         {
 
@@ -393,10 +450,10 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            
+
             //get manager school id
             int schoolId = int.Parse(User.Claims.Where(c => c.Type == "SchoolId").Select(c => c.Value).SingleOrDefault());
-           
+
             if (schoolId == -1)
             {
                 ModelState.AddModelError("school", "This manager does not have a school account.");
@@ -405,9 +462,9 @@ namespace M3allem.M3allem.Controller
 
             teacherEntity.PasswordHash = teacher.Password;
             _usersService.CreateTeacher(teacherEntity);
-            
+
             //Add teacher to school members
-            
+
             IActionResult res = null;
             TeacherDto teacherDto = new TeacherDto()
             {
@@ -422,13 +479,13 @@ namespace M3allem.M3allem.Controller
                 ModelState.AddModelError("School", e.Message);
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            
+
 
             return CreatedAtAction("GetById", new { id = teacherEntity.Id }, _mapper.Map<UserDto>(teacherEntity));
         }
 
         [HttpPut("ResetPasswordForTeacher/{id}")]
-        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Policies.SchoolManager, AuthenticationSchemes = "Bearer")]
         public IActionResult ResetPasswordForTeacher([FromBody] ResetPasswordDto resetPasswordDto, [FromRoute] string id)
         {
 
@@ -441,7 +498,7 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            ApplicationUser user =  _usersService.GetById(id).Result;
+            ApplicationUser user = _usersService.GetById(id).Result;
 
             if (user == null)
             {
@@ -455,16 +512,16 @@ namespace M3allem.M3allem.Controller
             }
 
             _usersService.ResetPassword(user, resetPasswordDto.NewPassword);
-                
-            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : "+ resetPasswordDto.NewPassword;
-            
-            _mailService.SendEmail(user.Email , "New password", body);
+
+            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : " + resetPasswordDto.NewPassword;
+
+            _mailService.SendEmail(user.Email, "New password", body);
 
             return Ok(resetPasswordDto);
         }
 
         [HttpPut("ResetPasswordForStudent/{id}")]
-        [Authorize(Roles = Policies.SchoolManager,AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Policies.SchoolManager, AuthenticationSchemes = "Bearer")]
         public IActionResult ResetPasswordForStudent([FromBody] ResetPasswordDto resetPasswordDto, [FromRoute] string id)
         {
 
@@ -477,7 +534,7 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            ApplicationUser user =  _usersService.GetById(id).Result;
+            ApplicationUser user = _usersService.GetById(id).Result;
 
             if (user == null)
             {
@@ -491,16 +548,16 @@ namespace M3allem.M3allem.Controller
             }
 
             _usersService.ResetPassword(user, resetPasswordDto.NewPassword);
-                
+
             string body = "Hello, here is your new password, We made it easy to remember :D  \n Please make sure you keep it in a safe place.\n The new password is: " + resetPasswordDto.NewPassword;
-            
-            _mailService.SendEmail(user.Email , "New password", body);
+
+            _mailService.SendEmail(user.Email, "New password", body);
 
             return Ok(resetPasswordDto);
         }
 
         [HttpPut("ResetPasswordForManager/{id}")]
-        [Authorize(Roles = Policies.Administrator,AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = Policies.Administrator, AuthenticationSchemes = "Bearer")]
         public IActionResult ResetPasswordForManager([FromBody] ResetPasswordDto resetPasswordDto, [FromRoute] string id)
         {
 
@@ -513,7 +570,7 @@ namespace M3allem.M3allem.Controller
             {
                 return BadRequest(Startup.GetErrorsFromModelState(ModelState));
             }
-            ApplicationUser user =  _usersService.GetById(id).Result;
+            ApplicationUser user = _usersService.GetById(id).Result;
 
             if (user == null)
             {
@@ -527,15 +584,15 @@ namespace M3allem.M3allem.Controller
             }
 
             _usersService.ResetPassword(user, resetPasswordDto.NewPassword);
-                
-            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : "+ resetPasswordDto.NewPassword;
-            
-            _mailService.SendEmail(user.Email , "New password", body);
+
+            string body = "Hello, here is your new password, We made it easy to remember :D \n The new password is : " + resetPasswordDto.NewPassword;
+
+            _mailService.SendEmail(user.Email, "New password", body);
 
             return Ok(resetPasswordDto);
         }
 
-        
+
         [HttpPost("RegisterAsSchoolManager")]
         public IActionResult RegisterAsSchoolManager([FromBody] RegisterAsSchoolManager schoolManager)
         {
@@ -560,7 +617,7 @@ namespace M3allem.M3allem.Controller
 
             schoolManagerEntity.PasswordHash = schoolManager.Password;
             _usersService.CreateSchoolManager(schoolManagerEntity);
-            
+
 
             return CreatedAtAction("GetById", new { id = schoolManagerEntity.Id }, _mapper.Map<UserDto>(schoolManagerEntity));
         }
