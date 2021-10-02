@@ -90,5 +90,9 @@ namespace iread_identity_ms.Web.Service
         {
             _repository.GetAppUsersRepository.Update(user, oldUser);
         }
+        public void Update(ApplicationUser user)
+        {
+            _repository.GetAppUsersRepository.Update(user);
+        }
     }
 }

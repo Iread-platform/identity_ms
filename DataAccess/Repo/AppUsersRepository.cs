@@ -98,5 +98,11 @@ namespace iread_identity_ms.DataAccess.Repo
             _context.ApplicationUsers.Update(oldUser);
             _context.SaveChanges();
         }
+
+        public void Update(ApplicationUser user)
+        {
+            _context.ApplicationUsers.Update(user);
+            _context.SaveChanges();
+        }
     }
 }
