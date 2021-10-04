@@ -325,7 +325,7 @@ namespace M3allem.M3allem.Controller
 
         [Authorize(Roles = Policies.Student, AuthenticationSchemes = "Bearer")]
         [HttpPut("update-my-image")]
-        public IActionResult UpdateMyImage([FromForm] int attachmentId, [FromForm] bool isAvatar)
+        public IActionResult UpdateMyImage([FromQuery] int attachmentId, [FromQuery] bool isAvatar)
         {
             if (attachmentId < 1)
             {
